@@ -1,3 +1,9 @@
+python-pootle (2.7.2-yelp6) lucid; urgency=low
+
+  * Stats: wrap jobs with close_if_unusable_or_obsolete() for rq workers
+
+ -- Desmond Chan <deschan@yelp.com>  Thurs, 03 May 2016 11:45:00 -0700
+
 python-pootle (2.7.2-yelp5) lucid; urgency=low
 
   * Fix quality checks
