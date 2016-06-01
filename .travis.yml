@@ -20,9 +20,11 @@ install:
   - pip install "Django>=$DJANGO_VERSION,<"$(echo $(echo $DJANGO_VERSION | cut -d"." -f1).$(( $(echo $DJANGO_VERSION | cut -d"." -f2) + 1 )) )
   - pip install .
   - pip freeze  # Print all installed versions for reference.
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 0.12
 before_script:
   - if [[ $DATABASE_BACKEND == 'postgres' ]]; then psql -c 'create database pootle;' -U postgres; fi
   - if [[ $DATABASE_BACKEND == 'mysql_innodb' ]]; then mysql -e 'create database pootle CHARACTER SET utf8 COLLATE utf8_general_ci;'; fi
+  - if [[ $DATABASE_BACKEND == 'mysql_innodb' ]]; then mysql -e "SET GLOBAL wait_timeout = 36000;"; fi
 script:
   - python -m compileall -q -f .
   - make docs
@@ -32,7 +34,8 @@ script:
   - make mo
   - DJANGO_SETTINGS_MODULE=pootle.settings ./setup.py build_checks_templates
   - ./manage.py migrate --noinput --traceback
-  - ./manage.py initdb --traceback
+  - ./manage.py migrate | (egrep "Your models have changes" && exit 1 || exit 0)
+  - ./manage.py initdb --traceback --no-projects
   - ./manage.py runserver --traceback &
   - TESTPID=$!
   - sleep 10
@@ -40,7 +43,7 @@ script:
   # FIXME reenable migration testing
   #- tests/version-migration/migrate.sh
   - make pep8
-  - py.test
+  - py.test --cov=. -vv
 notifications:
   email:
     on_failure: always
@@ -56,3 +59,5 @@ notifications:
       - "(%{branch} @ %{commit} : %{author}): %{message} %{build_url}"
 services:
   - redis-server
+after_success:
+  coveralls

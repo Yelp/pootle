@@ -281,20 +281,64 @@ Translation environment configuration settings.
 
 .. setting:: POOTLE_TM_SERVER
 
-.. versionadded:: 2.7
-
 ``POOTLE_TM_SERVER``
-  Default: Set to ``http://localhost:9200/translations``
+  .. versionadded:: 2.7
+
+  .. versionchanged:: 2.7.3
+
+     Added the :setting:`WEIGHT <POOTLE_TM_SERVER-WEIGHT>` option. Also added
+     another default TM used to import external translations from files.
+
+
+  Default: ``{}`` (empty dict)
+
+  Example configuration for local/external TM server:
+
+  .. code-block:: python
+
+    {
+        'local': {
+            'ENGINE': 'pootle.core.search.backends.ElasticSearchBackend',
+            'HOST': 'localhost',
+            'PORT': 9200,
+            'INDEX_NAME': 'translations',
+            'WEIGHT': 1,
+            'MIN_SCORE': 'AUTO',
+        },
+        'external': {
+            'ENGINE': 'pootle.core.search.backends.ElasticSearchBackend',
+            'HOST': 'localhost',
+            'PORT': 9200,
+            'INDEX_NAME': 'external-translations',
+            'WEIGHT': 0.9,
+            'MIN_SCORE': 'AUTO',
+        },
+    }
+
 
   This is configured to access a standard Elasticsearch setup.  Change the
   settings for any non-standard setup.  Change ``HOST`` and ``PORT`` settings
   as required.
 
   Use ``MIN_SCORE`` to set the Levenshtein Distance score.  Set it to ``AUTO``
-  so that Eslasticsearch will adjust the required score depending on the length
+  so that Elasticsearch will adjust the required score depending on the length
   of the string being translated. Elasticsearch documentation provides further
   details on `Fuzzy matching
   <https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#fuzziness>`_.
+
+  The default ``local`` TM is automatically updated every time a new
+  translation is submitted. The other TMs are not automatically updated so they
+  can be trusted to provide selected high quality translations.
+
+  .. setting:: POOTLE_TM_SERVER-INDEX_NAME
+
+  Every TM server must have its own unique ``INDEX_NAME``.
+
+  .. setting:: POOTLE_TM_SERVER-WEIGHT
+
+  ``WEIGHT`` provides a weighting factor to alter the final score for TM
+  results from this TM server. Valid values are between ``0.0`` and ``1.0``,
+  both included. Defaults to ``1.0`` if not provided.
 
 
 .. setting:: POOTLE_MT_BACKENDS
@@ -309,18 +353,13 @@ Translation environment configuration settings.
 
   Available options are:
 
-  ``APERTIUM``: Apertium service.
-    For this service you need to set the API key. Get your key at
-    http://api.apertium.org/register.jsp
-
   ``GOOGLE_TRANSLATE``: Google Translate service.
-    For this service you need to set the API key. Note that Google Translate
-    API is a paid service. See more at
-    https://cloud.google.com/translate/v2/pricing
+    For this service you need to obtain an API key. Note that Google Translate
+    API is a `paid service <https://cloud.google.com/translate/v2/pricing>`_.
 
   ``YANDEX_TRANSLATE``: Yandex.Translate service.
-    For this service you need to set the API key. Get your key at
-    https://tech.yandex.com/keys/get/?service=trnsl
+    For this service you need to `obtain a Yandex API key
+    <https://tech.yandex.com/keys/get/?service=trnsl>`_.
 
 .. setting:: PARSE_POOL_CULL_FREQUENCY
 

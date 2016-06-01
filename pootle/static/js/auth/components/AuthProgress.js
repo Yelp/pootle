@@ -6,15 +6,13 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 
 import AuthContent from './AuthContent';
 
 
-let AuthProgress = React.createClass({
+const AuthProgress = React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {

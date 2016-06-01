@@ -17,17 +17,28 @@ from optparse import make_option
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from pootle_misc.baseurl import l
+
 
 class Command(BaseCommand):
     help = 'Builds and bundles static assets using webpack'
 
     option_list = BaseCommand.option_list + (
-        make_option('--dev',
+        make_option(
+            '--dev',
             action='store_true',
             dest='dev',
             default=False,
-            help='Enable development builds and watch for changes.'),
-        )
+            help='Enable development builds and watch for changes.',
+        ),
+        make_option(
+            '--extra',
+            action='append',
+            dest='extra',
+            default=[],
+            help='Additional options to pass to the JavaScript webpack tool.',
+        ),
+    )
 
     def handle(self, *args, **options):
         default_static_dir = os.path.join(settings.WORKING_DIR, 'static')
@@ -45,9 +56,15 @@ class Command(BaseCommand):
                 '--colors']
 
         if options['dev']:
-            args.append('--watch')
+            args.extend(['--watch',  '--display-error-details'])
         else:
             os.environ['NODE_ENV'] = 'production'
+
+        args.extend(options['extra'])
+
+        static_base = l(settings.STATIC_URL)
+        suffix = 'js/' if static_base.endswith('/') else '/js/'
+        os.environ['WEBPACK_PUBLIC_PATH'] = static_base + suffix
 
         if custom_static_dirs:
             # XXX: review this for css

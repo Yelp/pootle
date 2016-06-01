@@ -22,6 +22,7 @@ from translate.misc.multistring import multistring
 SEPARATOR = "__%$%__%$%__%$%__"
 PLURAL_PLACEHOLDER = "__%POOTLE%_$NUMEROUS$__"
 
+
 def list_empty(strings):
     """check if list is exclusively made of empty strings.
 
@@ -132,7 +133,12 @@ class TranslationStoreFieldFile(FieldFile):
     def _get_realpath(self):
         """Return realpath resolving symlinks if necessary."""
         if not hasattr(self, "_realpath"):
-            self._realpath = os.path.realpath(self.path)
+            # Django's db.models.fields.files.FieldFile raises ValueError if
+            # if the file field has no name - and tests "if self" to check
+            if self:
+                self._realpath = os.path.realpath(self.path)
+            else:
+                self._realpath = ''
         return self._realpath
 
     @property
@@ -153,7 +159,10 @@ class TranslationStoreFieldFile(FieldFile):
     def _update_store_cache(self):
         """Add translation store to dictionary cache, replace old cached
         version if needed."""
-        mod_info = self.getpomtime()
+        if self.exists():
+            mod_info = self.getpomtime()
+        else:
+            mod_info = 0
         if (not hasattr(self, "_store_tuple") or
             self._store_tuple.mod_info != mod_info):
             try:
@@ -180,7 +189,7 @@ class TranslationStoreFieldFile(FieldFile):
             if self._store_tuple.mod_info != mod_info:
                 self._store_tuple.mod_info = mod_info
         else:
-            #FIXME: do we really need that?
+            # FIXME: do we really need that?
             self._update_store_cache()
 
     def _delete_store_cache(self):
@@ -210,7 +219,8 @@ class TranslationStoreFieldFile(FieldFile):
         self._touch_store_cache()
 
     def save(self, name, content, save=True):
-        #FIXME: implement save to tmp file then move instead of directly saving
+        # FIXME: implement save to tmp file then move instead of directly
+        # saving
         super(TranslationStoreFieldFile, self).save(name, content, save)
         self._delete_store_cache()
 

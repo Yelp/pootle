@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://github.com/translate/pootle/issues/new\n"
-"POT-Creation-Date: 2015-09-22 10:48+0100\n"
-"PO-Revision-Date: 2015-06-10 14:36+0000\n"
-"Last-Translator: wonjin <dnjs0309@naver.com>\n"
+"POT-Creation-Date: 2015-11-20 13:21+0000\n"
+"PO-Revision-Date: 2015-11-06 17:20+0000\n"
+"Last-Translator: wrinos <wrinos@naver.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
@@ -19,28 +19,30 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1-rc1\n"
 "Generated-By: pygettext.py 1.1\n"
-"X-POOTLE-MTIME: 1433947019.000000\n"
+"X-POOTLE-MTIME: 1446830417.000000\n"
 
 #: apps/accounts/adapter.py:64
 msgid ""
 "Some problem happened when tried to send the confirmation email. Please try "
 "again later."
 msgstr ""
+"확인 이메일을 보내려고 할 때 어떤 문제가 발생했습니다. 조금 뒤에 다시 시도해 "
+"주세요."
 
 #: apps/accounts/forms.py:43
 msgid ""
 "Your user seems to have disappeared. Please report this to the site owners."
-msgstr ""
+msgstr "당신의 사용자가 사라졌습니다. 사이트 소유자에게 보고하세요."
 
 # 실명을 적는 Full Name 항목과 혼동을 피하기 위해 '사용자 이름' 대신 '사용자 아이디'를 추천
 #: apps/accounts/models.py:61 apps/pootle_app/views/admin/permissions.py:86
 msgid "Username"
-msgstr "아이디"
+msgstr "사용자 이름"
 
 #: apps/accounts/models.py:62
 msgid ""
 "Required. 30 characters or fewer. Letters, numbers and @/./+/-/_ characters"
-msgstr "30자 이하가 요구됩니다. 영문자, 숫자 및  @/./+/-/_등의 특수문자"
+msgstr "30자 이하의 문자, 숫자, @/./+/-/_ 로조합된 사용자 이름이 필요합니다"
 
 #: apps/accounts/models.py:66
 msgid "Enter a valid username."
@@ -50,12 +52,12 @@ msgstr "유효한 사용자 이름을 입력하십시오."
 msgid "Email Address"
 msgstr "전자메일 주소"
 
-#: apps/accounts/models.py:71 apps/pootle_language/models.py:80
-#: apps/pootle_project/models.py:149
+#: apps/accounts/models.py:71 apps/pootle_language/models.py:81
+#: apps/pootle_project/models.py:150
 msgid "Full Name"
-msgstr "이름(성명)"
+msgstr "전체 이름"
 
-#: apps/accounts/models.py:73 apps/staticpages/models.py:28
+#: apps/accounts/models.py:73 apps/staticpages/models.py:32
 #: templates/admin/staticpages/_table.html:6
 msgid "Active"
 msgstr "활성화"
@@ -90,7 +92,7 @@ msgstr "가로 줄"
 msgid "Alternative Source Languages"
 msgstr "근본 언어 대안"
 
-#: apps/accounts/models.py:90 templates/admin/detailed_reports.html:149
+#: apps/accounts/models.py:90 templates/admin/detailed_reports.html:156
 msgid "Rate"
 msgstr "비율"
 
@@ -131,112 +133,106 @@ msgid "Short Bio"
 msgstr "짧은 경력"
 
 #: apps/accounts/models.py:308
-#, fuzzy
 msgid "This email address already exists."
-msgstr "이 단어는 이미 파일에 제출되었습니다."
+msgstr "이 email 주소는 이미 존재합니다."
 
 #: apps/accounts/views.py:37
 msgid ""
 "An error occurred logging you in. Please contact your system administrator"
-msgstr ""
+msgstr "로그인 중 에러 발생되었습니다. 시스템 관리자에게 연락하세요"
 
-#: apps/contact/forms.py:25
+#: apps/contact/forms.py:26
 msgid "Summary"
 msgstr "요약"
 
-#: apps/contact/forms.py:27
+#: apps/contact/forms.py:28
 msgid "Please enter your message summary"
 msgstr "당신의 요약한 메시지를 입력하시오"
 
-#: apps/contact/forms.py:34 apps/virtualfolder/models.py:32 core/browser.py:17
+#: apps/contact/forms.py:35 apps/virtualfolder/models.py:32 core/browser.py:17
 msgid "Name"
 msgstr "이름"
 
-#: apps/contact/forms.py:35
+#: apps/contact/forms.py:36
 msgid "Please enter your name"
-msgstr "이름을 입력해주십시오."
+msgstr "당신의 이름을 입력해 주세요"
 
-#: apps/contact/forms.py:38
+#: apps/contact/forms.py:39
 msgid "Email address"
 msgstr "이메일 주소"
 
-#: apps/contact/forms.py:39
+#: apps/contact/forms.py:40
 msgid "Please enter your email address"
-msgstr "이메일 주소를 기입해주세요."
+msgstr "이메일 주소를 기입해주세요"
 
-#: apps/contact/forms.py:42
+#: apps/contact/forms.py:43
 msgid "Message"
 msgstr "메시지"
 
-#: apps/contact/forms.py:43
+#: apps/contact/forms.py:44
 msgid "Please enter your message"
-msgstr "사용자 메세지를 입력해 주십시오."
+msgstr "당신의 메세지를 입력 해주세요"
 
 #: apps/import_export/templates/browser/index.html:10
-#, fuzzy
 msgid "Download translation files for offline translation"
-msgstr "오프라인 번역을 위해 XLIFF 내려받기"
+msgstr "오프라인 번역을 위해 번역파일 다운로드"
 
 #: apps/import_export/templates/browser/index.html:11
-#, fuzzy
 msgid "Download for offline translation"
-msgstr "오프라인 번역을 위해 XLIFF 내려받기"
+msgstr "오프라인 번역을 위해 다운로드"
 
 #: apps/import_export/templates/browser/index.html:19
-#, fuzzy
 msgid "Upload translation files or archives in .zip format"
-msgstr "모든 번역물을 가져왔습니다."
+msgstr "번역파일 또는 .zip파일 업로드"
 
 #: apps/import_export/templates/browser/index.html:20
-#, fuzzy
 msgid "Upload translations"
-msgstr "번역 내보내기"
+msgstr "번역 업로드"
 
 #: apps/import_export/utils.py:29
 #, python-format
 msgid "Unsupported filetype '%s', only PO files are supported at this time\n"
-msgstr ""
+msgstr "지원하지 않는 파일형식 '%s', 현재는 PO 파일들만 지원합니다\n"
 
 #: apps/import_export/utils.py:35
 #, python-format
 msgid "File '%s' missing X-Pootle-Path header\n"
-msgstr ""
+msgstr "파일 '%s' 에 X-Pootle-Path header가 없습니다\n"
 
 #: apps/import_export/utils.py:40
 #, python-format
 msgid "File '%s' missing or invalid X-Pootle-Revision header\n"
-msgstr ""
+msgstr "파일 '%s'가 없거나 X-Pootle-Revision heade가 유효하지 않습니다\n"
 
 #: apps/import_export/utils.py:48
 #, python-format
 msgid "Could not create '%s'. Missing Project/Language? (%s)"
-msgstr ""
+msgstr "'%s'생성 할 수 없습니다. Project/Language 누락인가요? (%s)"
 
 #: apps/import_export/utils.py:57
-#, fuzzy
 msgid "There was an error uploading your file"
-msgstr "파일을 업로드 하면서 번역을 덮어쓸 수 있습니다."
+msgstr "당신의 파일을 업로드 중 에러가 있었습니다"
 
-#: apps/pootle_app/forms.py:37
+#: apps/pootle_app/forms.py:38
 msgid "Language code does not follow the ISO convention"
-msgstr "언어 코드가 ISO 방식을 따르지 않습니다."
+msgstr "언어코드가 ISO 방식을 따르지 않습니다"
 
-#: apps/pootle_app/forms.py:45 apps/pootle_project/models.py:172
+#: apps/pootle_app/forms.py:46 apps/pootle_project/models.py:173
 msgid "Source Language"
 msgstr "원시 언어"
 
-#: apps/pootle_app/forms.py:91 apps/pootle_project/models.py:391
+#: apps/pootle_app/forms.py:97 apps/pootle_project/models.py:392
 #, python-format
 msgid "\"%s\" cannot be used as a project code"
-msgstr "프로젝트 코드로 사용할 수 없습니다."
+msgstr "\"%s\" 프로젝트 코드로 사용 될 수 없습니다"
 
-#: apps/pootle_app/forms.py:98 custom/templates/profiles/_tabs.html:5
+#: apps/pootle_app/forms.py:104 custom/templates/profiles/_tabs.html:5
 msgid "Password"
 msgstr "비밀번호"
 
-#: apps/pootle_app/forms.py:133 apps/pootle_profile/forms.py:28
+#: apps/pootle_app/forms.py:139 apps/pootle_profile/forms.py:28
 msgid "Please enter a valid LinkedIn user profile URL."
-msgstr "유효한 사용자 프로필 URL을 입력해 주십시오"
+msgstr "유효한 LinkedIn 사용자 프로필 URL을 입력해 주십시오."
 
 #: apps/pootle_app/views/admin/dashboard.py:80
 msgid "Files"
@@ -256,7 +252,7 @@ msgstr "번역된 문자열"
 
 #: apps/pootle_app/views/admin/dashboard.py:84
 msgid "Translated words"
-msgstr "번역된 단어"
+msgstr "번역된 단어들"
 
 # 현재 접속중인 사용자/ 활동중인 사용자가 문맥에 따라 맞을 수도 있겠습니다. 직접 마주치게되면 문맥을 알게되겠지요.
 #: apps/pootle_app/views/admin/dashboard.py:85
@@ -268,7 +264,7 @@ msgstr "접속중인 사용자"
 #, python-format
 msgid "Running (%d worker)"
 msgid_plural "Running (%d workers)"
-msgstr[0] ""
+msgstr[0] "실행 중 (%d workers)"
 
 #. Translators: this refers to the status of the background job worker
 #: apps/pootle_app/views/admin/dashboard.py:110
@@ -300,47 +296,49 @@ msgstr "이 프로젝트에 파일이 없습니다."
 msgid "There are errors in the form. Please review the problems below."
 msgstr "폼에 오류가 있습니다. 아래 문제들을 검토하십시오."
 
-#: apps/pootle_language/models.py:73
+#: apps/pootle_language/models.py:74
 msgid ""
 "ISO 639 language code for the language, possibly followed by an underscore "
 "(_) and an ISO 3166 country code. <a href=\"http://www.w3.org/International/"
 "articles/language-tags/\">More information</a>"
 msgstr ""
-"ISO 639 언어 코드는 밑줄(_) 과 ISO 3166 국가 코드가 따릅니다. 자세한 정보는 "
-"<a href=\"http://www.w3.org/International/articles/language-tags/\">를 참고하"
-"십시오."
+"언어에 대한 ISO 639 언어 코드는, 아마도 밑줄 (_) 및 ISO 3166 국가코드를 따른"
+"다. <a href=\"http://www.w3.org/International/articles/language-tags/\">자세"
+"한 정보</a>"
 
-#: apps/pootle_language/models.py:78 apps/pootle_project/models.py:146
+#: apps/pootle_language/models.py:79 apps/pootle_project/models.py:147
 msgid "Code"
 msgstr "코드"
 
-#: apps/pootle_language/models.py:82
+#: apps/pootle_language/models.py:83
 msgid "Enter any special characters that users might find difficult to type"
-msgstr "사용자들이 찾기 어려운 특수문자를 입력하십시오."
+msgstr "사용자들이 입력하기 힘든 어떤 특수문자들을 입력하세요"
 
-#: apps/pootle_language/models.py:85
+#: apps/pootle_language/models.py:86 templates/languages/_nav.html:31
+#: templates/languages/admin/characters.html:5
+#: templates/languages/admin/characters.html:9
 msgid "Special Characters"
 msgstr "특수 문자"
 
-#: apps/pootle_language/models.py:88
+#: apps/pootle_language/models.py:89
 msgid ""
 "For more information, visit <a href=\"http://docs.translatehouse.org/"
 "projects/localization-guide/en/latest/l10n/pluralforms.html\">our page</a> "
 "on plural forms."
 msgstr ""
-"더 많은 정보를 얻고 싶으시다면 <a href=\"http://docs.translatehouse.org/"
-"projects/localization-guide/en/latest/l10n/pluralforms.html\"> 에 방문해 주시"
-"기 바랍니다."
+"좀 더 많은, 복수문 양식에 관한 정보는 <a href=\"http://docs.translatehouse."
+"org/projects/localization-guide/en/latest/l10n/pluralforms.html\">이 곳을</"
+"a> 방문하세요."
 
-#: apps/pootle_language/models.py:93
+#: apps/pootle_language/models.py:94
 msgid "Unknown"
 msgstr "알 수 없음"
 
-#: apps/pootle_language/models.py:96
+#: apps/pootle_language/models.py:97
 msgid "Number of Plurals"
 msgstr "복수형의 수"
 
-#: apps/pootle_language/models.py:98
+#: apps/pootle_language/models.py:99
 msgid "Plural Equation"
 msgstr "복수형 계산식"
 
@@ -353,18 +351,16 @@ msgid "Cosmetic"
 msgstr "화장품"
 
 #: apps/pootle_misc/checks.py:35
-#, fuzzy
 msgid "Functional"
-msgstr "기능"
+msgstr "기능동작"
 
 #: apps/pootle_misc/checks.py:36
-#, fuzzy
 msgid "Extraction"
 msgstr "추출"
 
 #: apps/pootle_misc/checks.py:37
 msgid "Other"
-msgstr ""
+msgstr "기타"
 
 #: apps/pootle_misc/checks.py:41 apps/pootle_misc/checks.py:111
 msgid "Accelerators"
@@ -372,7 +368,7 @@ msgstr "가속장치"
 
 #: apps/pootle_misc/checks.py:42
 msgid "Acronyms"
-msgstr "머릿말"
+msgstr "두문자들"
 
 #: apps/pootle_misc/checks.py:43
 msgid "Blank"
@@ -392,7 +388,7 @@ msgstr "번역자 명단"
 
 #: apps/pootle_misc/checks.py:47
 msgid "Dialog sizes"
-msgstr ""
+msgstr "다이얼로그 크기"
 
 #: apps/pootle_misc/checks.py:48 apps/pootle_misc/checks.py:115
 msgid "Double quotes"
@@ -412,7 +408,7 @@ msgstr "전자메일"
 
 #: apps/pootle_misc/checks.py:52
 msgid "Ending punctuation"
-msgstr "구두점"
+msgstr "마침표"
 
 #: apps/pootle_misc/checks.py:53
 msgid "Ending whitespace"
@@ -460,7 +456,7 @@ msgstr "복수형의 수"
 
 #: apps/pootle_misc/checks.py:64
 msgid "Don't translate words"
-msgstr "단어가 번역이 않됩니다."
+msgstr "번역 금지 단어들"
 
 #: apps/pootle_misc/checks.py:65
 msgid "Numbers"
@@ -483,9 +479,8 @@ msgid "Pure punctuation"
 msgstr "순수 구두점"
 
 #: apps/pootle_misc/checks.py:70
-#, fuzzy
 msgid "Python brace placeholders"
-msgstr "Mustache  Plural form of placeholder"
+msgstr "파이썬 괄호 대체표시자"
 
 #: apps/pootle_misc/checks.py:71
 msgid "Number of sentences"
@@ -497,11 +492,11 @@ msgstr "짧음"
 
 #: apps/pootle_misc/checks.py:73
 msgid "Simple capitalization"
-msgstr "단순 투자"
+msgstr "대소문자 구분없음"
 
 #: apps/pootle_misc/checks.py:74
 msgid "Simple plural(s)"
-msgstr "간단한 복수형"
+msgstr "간단한 복수형(문)"
 
 #: apps/pootle_misc/checks.py:75
 msgid "Single quotes"
@@ -509,7 +504,7 @@ msgstr "작은 따옴표"
 
 #: apps/pootle_misc/checks.py:76
 msgid "Starting capitalization"
-msgstr "시작 부분"
+msgstr "첫 글자 대문자"
 
 #: apps/pootle_misc/checks.py:77
 msgid "Starting punctuation"
@@ -529,26 +524,26 @@ msgid "Unchanged"
 msgstr "변경하지 않음"
 
 #: apps/pootle_misc/checks.py:82 apps/pootle_misc/stats.py:27
-#: apps/pootle_store/util.py:30 core/helpers.py:58
+#: apps/pootle_store/util.py:30 core/helpers.py:63
 #: templates/editor/_filters.html:9
 msgid "Untranslated"
 msgstr "미번역"
 
 #: apps/pootle_misc/checks.py:83
 msgid "URLs"
-msgstr "주소"
+msgstr "URLs"
 
 #: apps/pootle_misc/checks.py:84
 msgid "Valid characters"
-msgstr "유효한 문자"
+msgstr "유효한 문자들"
 
 #: apps/pootle_misc/checks.py:85
 msgid "Placeholders"
-msgstr "플레이스 홀더(빠져 있는 다른 것을 대신하는 기호나 텍스트의 일부)"
+msgstr "대체표시자"
 
 #: apps/pootle_misc/checks.py:86
 msgid "Valid XML"
-msgstr ""
+msgstr "유효한 XML"
 
 #: apps/pootle_misc/checks.py:87
 msgid "XML tags"
@@ -566,21 +561,24 @@ msgstr "자바 포멧"
 msgid "Template format"
 msgstr "견본 포멧"
 
+# Mustache란? 템플릿 언어를 지칭하는 고유명사 이다.http://docs.ractivejs.org/latest/mustaches
 #: apps/pootle_misc/checks.py:92
 msgid "Mustache placeholders"
-msgstr "Mustache  Plural form of placeholder"
+msgstr "Mustache 대체표시자"
 
+# Comment: Mustache란? 템플릿 언어를 지칭하는 고유명사 이다.http://docs.ractivejs.org/latest/mustaches 
 #: apps/pootle_misc/checks.py:93
 msgid "Mustache placeholder pairs"
-msgstr "수염 기호쌍"
+msgstr "Mustache 대체표시자 쌍"
 
+# Comment: Mustache란? 템플릿 언어를 지칭하는 고유명사 이다.http://docs.ractivejs.org/latest/mustaches 
 #: apps/pootle_misc/checks.py:94
 msgid "Mustache like placeholder pairs"
-msgstr "자리표시자 한쌍인 Mustache"
+msgstr "Mustache 대체표시자 쌍"
 
 #: apps/pootle_misc/checks.py:95
 msgid "C format placeholders"
-msgstr "C 형식 자리표시자"
+msgstr "C 형식 대체표시자"
 
 #: apps/pootle_misc/checks.py:96
 msgid "Non printable"
@@ -588,11 +586,11 @@ msgstr "인쇄 불가능"
 
 #: apps/pootle_misc/checks.py:97
 msgid "Unbalanced tag braces"
-msgstr "균형잡히지 않은 태크 가지"
+msgstr "괄호 태그들 맞지 않음"
 
 #: apps/pootle_misc/checks.py:98
 msgid "Changed attributes"
-msgstr "변경된 속성"
+msgstr "변경된 속성들"
 
 #: apps/pootle_misc/checks.py:99
 msgid "Unescaped ampersands"
@@ -612,23 +610,23 @@ msgstr "날짜 형식"
 
 #: apps/pootle_misc/checks.py:103
 msgid "Uppercase placeholders"
-msgstr "대문자 개체틀"
+msgstr "대문자 대체표시자"
 
 #: apps/pootle_misc/checks.py:104
 msgid "Percent sign placeholders"
-msgstr "퍼센트 표시 개체"
+msgstr "퍼센트 표시 대체표시자"
 
 #: apps/pootle_misc/checks.py:105
 msgid "Percent sign closure placeholders"
-msgstr "퍼센트 사인은 개체를 종료시킵니다."
+msgstr "퍼센트 닫음표시 대체표시자"
 
 #: apps/pootle_misc/checks.py:106
 msgid "$ placeholders"
-msgstr "$자리표시자"
+msgstr "$ 대체표시자"
 
 #: apps/pootle_misc/checks.py:107
 msgid "$ closure placeholders"
-msgstr "$ closure placeholders"
+msgstr "$ 닫음표시 대체표시자"
 
 #: apps/pootle_misc/checks.py:108
 msgid "Java-encoded unicode"
@@ -652,25 +650,24 @@ msgstr "중괄호"
 
 #: apps/pootle_misc/checks.py:114
 msgid "Potential unwanted placeholders"
-msgstr "반갑지 않은 잠재적인 자리표시자"
+msgstr "불필요한 잠재요소 대체표시자"
 
 #: apps/pootle_misc/checks.py:116
 msgid "Double quotes in tags"
 msgstr "태그안의 큰 따옴표"
 
 #: apps/pootle_misc/checks.py:117
-#, fuzzy
 msgid "Percent brace placeholders"
-msgstr "퍼센트 표시 개체"
+msgstr "퍼센트 괄호 대체표시자"
 
 #. Translators: This is the name of a filter
-#: apps/pootle_misc/forms.py:90 core/helpers.py:62
+#: apps/pootle_misc/forms.py:90 core/helpers.py:67
 msgid "Search"
 msgstr "찾기"
 
 #: apps/pootle_misc/forms.py:91
 msgid "Search (Ctrl+Shift+S)<br/>Type and press Enter to search"
-msgstr "Ctrl+Shift+S의 찾기 유형 그리고 엔터를 눌러라!"
+msgstr "검색 (Ctrl+Shift+S)<br/>검색 하려면 입력하고 엔터를 누르세요"
 
 #: apps/pootle_misc/forms.py:99
 msgid "Exact Match"
@@ -695,12 +692,12 @@ msgstr "위치"
 #. Translators: Heading representing the total number of words of a file
 #. or directory
 #: apps/pootle_misc/stats.py:24 core/browser.py:45
-#: templates/admin/detailed_reports.html:275
+#: templates/admin/detailed_reports.html:318
 msgid "Total"
 msgstr "전체"
 
 #: apps/pootle_misc/stats.py:25 apps/pootle_store/util.py:32
-#: core/helpers.py:57 templates/editor/_filters.html:7
+#: core/helpers.py:62 templates/editor/_filters.html:7
 msgid "Translated"
 msgstr "번역됨"
 
@@ -729,55 +726,55 @@ msgstr "하나 또는 그 이상의 언어를 선택하십시오"
 msgid "Language"
 msgstr "언어"
 
-#: apps/pootle_project/models.py:143
+#: apps/pootle_project/models.py:144
 msgid ""
 "A short code for the project. This should only contain ASCII characters, "
 "numbers, and the underscore (_) character."
 msgstr "프로젝트를 위한 짧은 코드. ASCII 문자, 숫자, 밑줄(_)만 포함합니다."
 
-#: apps/pootle_project/models.py:157
+#: apps/pootle_project/models.py:158
 msgid "Quality Checks"
 msgstr "품질 검사"
 
-#: apps/pootle_project/models.py:160
+#: apps/pootle_project/models.py:161
 msgid "File Type"
 msgstr "파일 유형"
 
-#: apps/pootle_project/models.py:164
+#: apps/pootle_project/models.py:165
 msgid "Automatic detection (slower)"
 msgstr "자동 감지(느리게)"
 
-#: apps/pootle_project/models.py:165
+#: apps/pootle_project/models.py:166
 msgid "GNU style: files named by language code"
 msgstr "GNU 스타일: 언어코드에 의해 이름 지어진 파일"
 
-#: apps/pootle_project/models.py:166
+#: apps/pootle_project/models.py:167
 msgid "Non-GNU: Each language in its own directory"
 msgstr "비 GNU: 고유 디렉터리의 각 언어"
 
-#: apps/pootle_project/models.py:169
+#: apps/pootle_project/models.py:170
 msgid "Project Tree Style"
 msgstr "프로젝트 트리 스타일"
 
-#: apps/pootle_project/models.py:175
+#: apps/pootle_project/models.py:176
 msgid "Ignore Files"
 msgstr "파일 무시"
 
-#: apps/pootle_project/models.py:180
+#: apps/pootle_project/models.py:181
 msgid "Errors Report Email"
 msgstr "에러 리포트 이메일"
 
-#: apps/pootle_project/models.py:181
+#: apps/pootle_project/models.py:182
 msgid "An email address where issues with the source text can be reported."
 msgstr "어디서나 이슈가 될수 있는 소식은 이메일 주소에 언급 될 수 있습니다."
 
-#: apps/pootle_project/models.py:185
+#: apps/pootle_project/models.py:186
 msgid "Screenshot Search Prefix"
-msgstr "스크린샷  찾기 접두사"
+msgstr "스크린샷 찾기 접두사"
 
-#: apps/pootle_project/models.py:190
+#: apps/pootle_project/models.py:191
 msgid "Disabled"
-msgstr "사용 안함 "
+msgstr "사용 안 함"
 
 #: apps/pootle_statistics/models.py:71 templates/editor/export_view.html:105
 msgid "Source"
@@ -796,19 +793,18 @@ msgid "Comment"
 msgstr "코멘트"
 
 #: apps/pootle_statistics/models.py:351
-#, fuzzy
 msgid "Added suggestion"
-msgstr "제안된 번역문(%d개)"
+msgstr "추가된 제안"
 
 #: apps/pootle_statistics/models.py:352
-#, fuzzy, python-format
+#, python-format
 msgid "Accepted suggestion from %s"
-msgstr "제안 사항 수락"
+msgstr "%s 제안 수락"
 
 #: apps/pootle_statistics/models.py:353
-#, fuzzy, python-format
+#, python-format
 msgid "Rejected suggestion from %s"
-msgstr "제안 사항 거부"
+msgstr "%s 제안 거부"
 
 #: apps/pootle_store/decorators.py:27
 msgid "Insufficient rights to access this directory."
@@ -816,28 +812,27 @@ msgstr "이 디렉토리에 접근하기 위한 권한이 부족합니다."
 
 #: apps/pootle_store/decorators.py:30
 msgid "Insufficient rights to access suggestion mode."
-msgstr "제안 모드에 접근하기 위한 권한 부족"
+msgstr "제안모드에 접근하기 위한 권한이 아닙니다."
 
 #: apps/pootle_store/decorators.py:31
 msgid "Insufficient rights to access translation mode."
-msgstr "번역모드에 접근하기 위한 권한 부족"
+msgstr "번역모드에 접근하기 위한 권한이 아닙니다."
 
-#: apps/pootle_store/decorators.py:32 apps/pootle_store/views.py:1012
+#: apps/pootle_store/decorators.py:32 apps/pootle_store/views.py:1001
 msgid "Insufficient rights to access review mode."
-msgstr "리뷰모드에 접근하기 위한 권한 부족"
+msgstr "리뷰모드에 접근하기 위한 권한이 아닙니다."
 
 #: apps/pootle_store/filetypes.py:20
 msgid "Gettext PO"
 msgstr "Gettext PO"
 
 #: apps/pootle_store/filetypes.py:24
-#, fuzzy
 msgid "XLIFF (.xlf)"
-msgstr "XLIFF 파일"
+msgstr "XLIFF (.xlf)"
 
 #: apps/pootle_store/filetypes.py:25
 msgid "XLIFF (.xliff)"
-msgstr ""
+msgstr "XLIFF (.xliff)"
 
 #: apps/pootle_store/filetypes.py:31
 msgid "Qt ts"
@@ -863,61 +858,60 @@ msgstr "엑셀 CSV"
 msgid "Mozilla .lang"
 msgstr "Mozilla .lang"
 
-#: apps/pootle_store/forms.py:88
-#: apps/pootle_store/templatetags/store_tags.py:147
-#: apps/pootle_store/templatetags/store_tags.py:163
-#: apps/pootle_store/templatetags/store_tags.py:170
-#: apps/pootle_store/templatetags/store_tags.py:182
-#: apps/pootle_store/templatetags/store_tags.py:184
+#: apps/pootle_store/forms.py:93
+#: apps/pootle_store/templatetags/store_tags.py:151
+#: apps/pootle_store/templatetags/store_tags.py:168
+#: apps/pootle_store/templatetags/store_tags.py:175
+#: apps/pootle_store/templatetags/store_tags.py:189
+#: apps/pootle_store/templatetags/store_tags.py:191
 #, python-format
 msgid "Plural Form %d"
 msgstr "복수 형태 %d"
 
-#: apps/pootle_store/forms.py:211 apps/pootle_store/util.py:31
-#: core/helpers.py:59 templates/editor/_filters.html:10
+#: apps/pootle_store/forms.py:216 apps/pootle_store/util.py:31
+#: core/helpers.py:64 templates/editor/_filters.html:10
 msgid "Needs work"
 msgstr "작업이 필요하다"
 
-#: apps/pootle_store/forms.py:247
-#, fuzzy
+#: apps/pootle_store/forms.py:252
 msgid "Needs work flag must be cleared"
-msgstr "더러운 깃발을 깨끗하게 해야합니다."
+msgstr "작업표시를 없애야 합니다"
 
-#: apps/pootle_store/forms.py:290
+#: apps/pootle_store/forms.py:295
 msgid "Value of `similarity` should be in in the [0..1] range"
-msgstr "'유사성'의 정도는 0..1의 범위안에 있다"
+msgstr "값 `유사성` 은 [0..1] 범위안에 있어야 한다"
 
-#: apps/pootle_store/forms.py:300
+#: apps/pootle_store/forms.py:305
 msgid "Value of `mt_similarity` should be in in the [0..1] range"
-msgstr "'mt_similarity'의 정도는 0..1의 범위안에 있다"
+msgstr "값 `mt_similarity`는 [0..1] 범위안에 있어야 한다"
 
-#: apps/pootle_store/forms.py:325
+#: apps/pootle_store/forms.py:330
 msgid "Translator comment"
 msgstr "번역자 주석"
 
-#: apps/pootle_store/models.py:146
+#: apps/pootle_store/models.py:156
 msgid "Pending"
 msgstr "대기 중"
 
-#: apps/pootle_store/models.py:147
+#: apps/pootle_store/models.py:157
 msgid "Accepted"
 msgstr "수락"
 
-#: apps/pootle_store/models.py:148
+#: apps/pootle_store/models.py:158
 msgid "Rejected"
 msgstr "거부됨"
 
-#: apps/pootle_store/models.py:1343
+#: apps/pootle_store/models.py:1366
 msgid "Path"
 msgstr "경로"
 
-#: apps/pootle_store/templatetags/store_tags.py:141
-#: apps/pootle_store/templatetags/store_tags.py:143
+#: apps/pootle_store/templatetags/store_tags.py:144
+#: apps/pootle_store/templatetags/store_tags.py:147
 msgid "Singular"
 msgstr "단수형"
 
-#: apps/pootle_store/templatetags/store_tags.py:141
-#: apps/pootle_store/templatetags/store_tags.py:143
+#: apps/pootle_store/templatetags/store_tags.py:144
+#: apps/pootle_store/templatetags/store_tags.py:147
 msgid "Plural"
 msgstr "복수형"
 
@@ -925,23 +919,23 @@ msgstr "복수형"
 msgid "Obsolete"
 msgstr "쓸모없는"
 
-#: apps/pootle_store/views.py:467 core/decorators.py:46
+#: apps/pootle_store/views.py:462 core/decorators.py:46
 msgid "Arguments missing."
-msgstr "누락된 인수"
+msgstr "누락된 인수."
 
-#: apps/pootle_store/views.py:708
+#: apps/pootle_store/views.py:700
 msgid "Failed to remove comment."
 msgstr "커멘트 삭제에 실패하였습니다."
 
-#: apps/pootle_store/views.py:742
+#: apps/pootle_store/views.py:734
 msgid "Comment submission failed."
 msgstr "커멘트 제출을 실패하였습니다."
 
-#: apps/pootle_store/views.py:941
+#: apps/pootle_store/views.py:930
 msgid "Failed to process submission."
 msgstr "프로세스 제출에 실패하였습니다."
 
-#: apps/pootle_store/views.py:982
+#: apps/pootle_store/views.py:971
 msgid "Failed to process suggestion."
 msgstr "요청을 처리하는데 실패했습니다."
 
@@ -960,16 +954,16 @@ msgstr "효과적으로"
 #: apps/reports/models.py:31 apps/reports/models.py:43
 #: templates/editor/export_view.html:106
 #: templates/translation_projects/terminology/manage.html:35
-#: templates/user/settings.html:29
+#: templates/user/settings.html:28
 msgid "Translation"
 msgstr "번역"
 
 #: apps/reports/models.py:32 apps/reports/models.py:44
+#: templates/admin/detailed_reports.html:232
 msgid "Review"
 msgstr "검토"
 
 #: apps/reports/models.py:33
-#, fuzzy
 msgid "Suggestion"
 msgstr "제안"
 
@@ -997,14 +991,14 @@ msgstr "날짜"
 msgid "Description"
 msgstr "설명"
 
-#: apps/reports/views.py:320
+#: apps/reports/views.py:331
 #, python-format
 msgid "User %s not found"
-msgstr "사용자를 찾을 수 없습니다."
+msgstr "사용자 %s 를 찾지 못 했습니다"
 
-#: apps/reports/views.py:397
+#: apps/reports/views.py:408
 msgid "Invalid request method"
-msgstr "잘못된 요청 방법입니다."
+msgstr "잘못된 요청 방법입니다"
 
 #: apps/staticpages/forms.py:59
 #, python-format
@@ -1012,113 +1006,119 @@ msgid ""
 "I have read and accept: <a href=\"%(url)s\" class=\"%(classes)s\">%(title)s</"
 "a>"
 msgstr ""
-"그대로 받아들이고<a href=\"%(url)s\" class=\"%(classes)s\">%(title)s</a>을 읽"
-"고있다."
+"나는 일고 수락함: <a href=\"%(url)s\" class=\"%(classes)s\">%(title)s</a>"
 
-#: apps/staticpages/models.py:30
+#: apps/staticpages/models.py:34
 msgid "Whether this page is active or not."
 msgstr "이 페이지는 활성화 되어 있거나 않되어 있다."
 
-#: apps/staticpages/models.py:33 templates/admin/staticpages/_table.html:7
+#: apps/staticpages/models.py:37 templates/admin/staticpages/_table.html:7
 msgid "Virtual Path"
 msgstr "가상통로"
 
-#: apps/staticpages/models.py:40
+#: apps/staticpages/models.py:44
 msgid "Title"
 msgstr "제목"
 
 #. Translators: Content that will be used to display this static page
-#: apps/staticpages/models.py:43
+#: apps/staticpages/models.py:47
 msgid "Display Content"
 msgstr "컨텐츠 보이기"
 
-#: apps/staticpages/models.py:45
+#: apps/staticpages/models.py:49
 #, python-format
 msgid "Allowed markup: %s"
 msgstr "허용된 마크업%s"
 
-#: apps/staticpages/models.py:48 templates/admin/staticpages/_table.html:9
+#: apps/staticpages/models.py:52 templates/admin/staticpages/_table.html:9
 msgid "Redirect to URL"
 msgstr "URL 리디렉션"
 
-#: apps/staticpages/models.py:50
-msgid "If set, any references to this page will redirect to this URL"
-msgstr "이미 설정된 경우, 이 페이지에 대한 언급 이 URL로 리디렉션 합니다."
+#: apps/staticpages/models.py:54
+#, fuzzy
+msgid "If set, this page will redirect to this URL"
+msgstr "만약 지정된 경우,이 페이지에 대한 참조는이 URL로 리디렉션됩니다"
 
 #. Translators: 'URL' and 'content' refer to form fields.
-#: apps/staticpages/models.py:96
+#: apps/staticpages/models.py:99
 msgid "URL or content must be provided."
-msgstr "url 또는 콘텐츠 제공돼야한다."
+msgstr "URL 또는 콘텐츠가 제공 되어야한다."
 
-#: apps/staticpages/models.py:104
+#: apps/staticpages/models.py:107
 msgid "Virtual path already in use."
 msgstr "이미 사용 중 가상 경로입니다."
 
-#: apps/staticpages/models.py:113
+#: apps/staticpages/models.py:116
 msgid "Legal Page"
 msgstr "법률 페이지"
 
-#: apps/staticpages/models.py:124
+#: apps/staticpages/models.py:127
 msgid "Regular Page"
 msgstr "정규 페이지"
 
-#: apps/staticpages/views.py:121 templates/admin/staticpages/_table.html:8
+#: apps/staticpages/views.py:119 templates/admin/staticpages/_table.html:8
 msgid "Page Title"
 msgstr "페이지 제목"
 
 #. Translators: 'projects' must not be translated.
-#: apps/staticpages/views.py:138
+#: apps/staticpages/views.py:136
 msgid ""
 "projects/<project_code> or <language_code> or <language_code>/<project_code>"
 msgstr ""
+"projects/<project_code> 또는 <language_code> 또는 <language_code>/"
+"<project_code>"
+
+#: apps/staticpages/views.py:231
+#, fuzzy
+msgid "Text is missing"
+msgstr "누락된 인수."
 
 #: apps/virtualfolder/models.py:34
-#, fuzzy
 msgid "Location"
 msgstr "위치"
 
 #: apps/virtualfolder/models.py:37
 msgid "Root path where this virtual folder is applied."
-msgstr ""
+msgstr "이 가상폴더를 Root Path로 적용 했습니다."
 
 #. Translators: This is a noun.
 #: apps/virtualfolder/models.py:41
 msgid "Filter"
-msgstr ""
+msgstr "필터"
 
 #: apps/virtualfolder/models.py:43
 msgid "Filtering rules that tell which stores this virtual folder comprises."
-msgstr ""
+msgstr "이 가상 폴더를 포함하고 저장하는 필터링 규칙들에 대한 설명."
 
 #: apps/virtualfolder/models.py:47 core/browser.py:22
 msgid "Priority"
-msgstr ""
+msgstr "우선순위"
 
 #: apps/virtualfolder/models.py:49
 msgid ""
 "Number specifying importance. Greater priority means it is more important."
-msgstr ""
+msgstr "중요도 숫자 값 지정 . 더 큰 값이 더 중요한 것을 의미 함."
 
 #: apps/virtualfolder/models.py:53
 msgid "Is public?"
-msgstr ""
+msgstr "퍼블릭으로 되어 있습니까?"
 
 #: apps/virtualfolder/models.py:55
-#, fuzzy
 msgid "Whether this virtual folder is public or not."
-msgstr "이 페이지는 활성화 되어 있거나 않되어 있다."
+msgstr "이 가상폴더 공개 여부."
 
 #: apps/virtualfolder/models.py:60
 #, python-format
 msgid ""
 "Use this to provide more information or instructions. Allowed markup: %s"
-msgstr ""
+msgstr "정보나 명령을 더 제공하기 위해서 이것을 사용하세요. 허용된 markup: %s"
 
 #: checks.py:56
 msgid ""
 "There are user accounts with duplicate emails. This will not be allowed in "
 "Pootle 2.8."
 msgstr ""
+"사용자 계정에 중복된 이메일이 있습니다. Pootle 2.8에서는 허용하지 않습니다."
 
 #: checks.py:58
 msgid ""
@@ -1126,64 +1126,66 @@ msgid ""
 "'pootle update_user_email username email'. You might also want to consider "
 "using pootle merge_user or purge_user commands"
 msgstr ""
+"'pootle find_duplicate_emails'을 사용해 보십시오, 그리고 나서 'pootle "
+"update_user_email username email'을 이용해 사용자 이메일들을 업데이트 하세"
+"요. 당신은 merge_user 또는 purge_user commands를 사용하는 것을 고려해 볼 수 "
+"있습니다"
 
 #: checks.py:82
 msgid "Your version of Django is too old."
-msgstr ""
+msgstr "사용자의 Django 버젼이 오래된 버젼입니다."
 
 #: checks.py:83
 #, python-format
 msgid "Try pip install --upgrade 'Django==%s'"
-msgstr ""
+msgstr "시도하세요 pip install --upgrade 'Django==%s'"
 
 #: checks.py:90
 msgid "Your version of lxml is too old."
-msgstr ""
+msgstr "당신의 lxml버젼이 오래 되었습니다."
 
 #: checks.py:91
 msgid "Try pip install --upgrade lxml"
-msgstr ""
+msgstr "시도하세요 pip install --upgrade lxml"
 
 #: checks.py:97
 msgid "Your version of Translate Toolkit is too old."
-msgstr ""
+msgstr "당신의 Translate Toolkit 버젼이 구버젼 입니다."
 
 #: checks.py:98
 msgid "Try pip install --upgrade translate-toolkit"
-msgstr ""
+msgstr "시도하세요 pip install --upgrade translate-toolkit"
 
 #: checks.py:117
 #, python-format
 msgid "Could not connect to Redis (%s)"
-msgstr ""
+msgstr "Redis (%s)에 연결 할 수 없습니다"
 
 #: checks.py:118
-#, fuzzy, python-format
+#, python-format
 msgid "Make sure Redis is running on %(host)s:%(port)s"
-msgstr "Redis 서버가 %(host)s:%(port)s에 연결을 허용하였습니다."
+msgstr "Redis가 %(host)s:%(port)s로 동작 하는지 확인"
 
 #: checks.py:127
-#, fuzzy
 msgid "Your version of Redis is too old."
-msgstr "Django 버전 %s 설치되어있습니다."
+msgstr "당신의 Redis 버젼이 오래 되었습니다."
 
 #: checks.py:128
 #, python-format
 msgid "Update your system's Redis server package to at least version %s"
-msgstr ""
+msgstr "최신버젼 %s 로 당신의 Redis 서버 패키지를 업데이트 하세요"
 
 #: checks.py:138
-#, fuzzy
 msgid "No RQ Worker running."
-msgstr "RQ 작업자가 활동하고 있지 않습니다."
+msgstr "RQ 작업자가 동작하고 있는게 없습니다."
 
 #: checks.py:139
 msgid "Run new workers with manage.py rqworker"
-msgstr ""
+msgstr "새 workers를 manage.py rqworker와 함께 실행하시오"
 
 #: checks.py:154
 msgid "Cache backend is not set to Redis."
-msgstr ""
+msgstr "백엔드 캐쉬가 Redis로 지정되지 않았습니다."
 
 #: checks.py:155
 #, python-format
@@ -1191,34 +1193,37 @@ msgid ""
 "Set default cache backend to django_redis.cache.RedisCache\n"
 "Current settings: %r"
 msgstr ""
+"기본 백엔드 캐쉬를 django_redis.cache.RedisCache 로 지정하세요\n"
+"현재 설정들: %r"
 
 #: checks.py:164
 msgid "Could not initiate a Redis cache connection"
-msgstr ""
+msgstr "Redis 캐쉬 연결을 초기화 할 수 없습니다"
 
 #: checks.py:165
 msgid "Double-check your CACHES settings"
-msgstr ""
+msgstr "당신의 CACHES 설정들을 이중-체크 하세요"
 
 #: checks.py:171
 msgid "DEBUG mode is on. Do not do this in production!"
-msgstr ""
+msgstr "DEBUG 모드가 활성화 되었습니다. production에서는 활성화 하지마세요!"
 
 #: checks.py:172
 msgid "Set DEBUG = False in Pootle settings"
-msgstr ""
+msgstr "Pootle 설정에서 DEBUG = False 로 지정하세요"
 
 #: checks.py:178
 msgid "The sqlite database backend is unsupported"
-msgstr ""
+msgstr "백엔드로 sqlite 데이터베이스를 지원하지 않습니다"
 
 #: checks.py:179
 msgid "Set your default database engine to postgresql_psycopg2 or mysql"
 msgstr ""
+"당신의 기본 데이터베이스 엔진을 postgresql_psycopg2 또는 mysql로 지정하시오"
 
 #: checks.py:185
 msgid "Not using cached_db as session engine"
-msgstr ""
+msgstr "세션엔진으로 cached_db를 사용하지 않음"
 
 #: checks.py:186
 #, python-format
@@ -1226,69 +1231,74 @@ msgid ""
 "Set SESSION_ENGINE to django.contrib.sessions.backend.cached_db\n"
 "Current settings: %r"
 msgstr ""
+"django.contrib.sessions.backend.cached_db에 SESSION_ENGINE지정\n"
+"현재 설정: %r"
 
 #: checks.py:193
 msgid "POOTLE_CONTACT_EMAIL is not set."
-msgstr ""
+msgstr "POOTLE_CONTACT_EMAIL이 지정되지 않았습니다."
 
 #: checks.py:194
 msgid ""
 "Set POOTLE_CONTACT_EMAIL to allow users to contact administrators through "
 "the Pootle contact form."
 msgstr ""
+"Pootle contact form을 통해서 관리자에게 접촉하려는 유저들을 허용하려면 "
+"POOTLE_CONTACT_EMAIL 지정하시오."
 
 #: checks.py:202
 #, python-format
 msgid "POOTLE_CONTACT_EMAIL is using the following default setting %r."
-msgstr ""
+msgstr "POOTLE_CONTACT_EMAIL 은 %r 로 사용하도록 기본설정 되어있습니다."
 
 #: checks.py:204
 msgid ""
 "POOTLE_CONTACT_EMAIL is the address that will receive messages sent by the "
 "contact form."
 msgstr ""
+"POOTLE_CONTACT_EMAIL은 contact form을 통해 보내진 메세지를 받기 위한 주소입니"
+"다."
 
 #: checks.py:211
 msgid "DEFAULT_FROM_EMAIL is not set."
-msgstr ""
+msgstr "DEFAULT_FROM_EMAIL이 설정되지 않았습니다."
 
 #: checks.py:212 checks.py:222
 msgid ""
 "DEFAULT_FROM_EMAIL is used in all outgoing Pootle email.\n"
 "Don't forget to review your mail server settings."
 msgstr ""
+"DEFAULT_FROM_EMAIL이 모든 외부로 가는 Pootle email에 사용됩니다.\n"
+"당신의 메일서버 설정을 살펴보는 것을 있지마세요."
 
 #: checks.py:220
 #, python-format
 msgid "DEFAULT_FROM_EMAIL is using the following default setting %r."
-msgstr ""
+msgstr "DEFAULT_FROM_EMAIL는 기본설정에 따라 사용됩니다 %r."
 
 #: checks.py:231
-#, fuzzy
 msgid "POOTLE_MARKUP_FILTER is missing."
-msgstr "MARKUP_FILTER가 빠졌습니다. HTML로 돌아갑니다."
+msgstr "POOTLE_MARKUP_FILTER가 없습니다."
 
 #: checks.py:232
 msgid "Set POOTLE_MARKUP_FILTER."
-msgstr ""
+msgstr "POOTLE_MARKUP_FILTER 지정."
 
 #: checks.py:237
-#, fuzzy
 msgid "Invalid value in POOTLE_MARKUP_FILTER."
-msgstr ""
-"'%s' 마크업 지원을 제공하는 패키지를 찾을 수 없습니다. HTML로 돌아갑니다."
+msgstr "유효하지 않은 값이 POOTLE_MARKUP_FILTER에 있습니다."
 
 #: checks.py:238
 msgid "Set a valid value for POOTLE_MARKUP_FILTER."
-msgstr ""
+msgstr "POOTLE_MARKUP_FILTER의 유효한 값을 지정."
 
 #: checks.py:252
 msgid "Invalid markup in POOTLE_MARKUP_FILTER."
-msgstr ""
+msgstr "POOTLE_MARKUP_FILTER에 유효하지 않은 markup."
 
 #: checks.py:253
 msgid "Set a valid markup for POOTLE_MARKUP_FILTER."
-msgstr ""
+msgstr "POOTLE_MARKUP_FILTER위한 유효한 markup 지정."
 
 #: checks.py:258
 #, python-format
@@ -1296,37 +1306,110 @@ msgid ""
 "POOTLE_MARKUP_FILTER is set to '%s' markup, but the package that provides "
 "can't be found."
 msgstr ""
+"POOTLE_MARKUP_FILTER 가 '%s' markup으로 지정 됨, 하지만 제공하는 패키지를 찾"
+"을 수 없다."
 
 #: checks.py:260
 msgid "Install the package or change POOTLE_MARKUP_FILTER."
+msgstr "패키지를 설치하거나 POOTLE_MARKUP_FILTER를 변경."
+
+#: checks.py:271
+#, python-format
+msgid "POOTLE_TM_SERVER['%s'] has no INDEX_NAME."
 msgstr ""
 
-#: checks.py:284
+#: checks.py:272
+#, python-format
+msgid "Set an INDEX_NAME for POOTLE_TM_SERVER['%s']."
+msgstr ""
+
+#: checks.py:278
+#, python-format
+msgid "Duplicate '%s' INDEX_NAME in POOTLE_TM_SERVER."
+msgstr ""
+
+#: checks.py:280
+msgid "Set different INDEX_NAME for all servers in POOTLE_TM_SERVER."
+msgstr ""
+
+#: checks.py:289
+#, python-format
+msgid "POOTLE_TM_SERVER['%s'] has no ENGINE."
+msgstr ""
+
+#: checks.py:290
+#, python-format
+msgid "Set a ENGINE for POOTLE_TM_SERVER['%s']."
+msgstr ""
+
+#: checks.py:297
+#, python-format
+msgid "POOTLE_TM_SERVER['%s'] has no HOST."
+msgstr ""
+
+#: checks.py:298
+#, python-format
+msgid "Set a HOST for POOTLE_TM_SERVER['%s']."
+msgstr ""
+
+#: checks.py:305
+#, python-format
+msgid "POOTLE_TM_SERVER['%s'] has no PORT."
+msgstr ""
+
+#: checks.py:306
+#, python-format
+msgid "Set a PORT for POOTLE_TM_SERVER['%s']."
+msgstr ""
+
+#: checks.py:313
+#, python-format
+msgid "POOTLE_TM_SERVER['%s'] has no MIN_SCORE."
+msgstr ""
+
+#: checks.py:314
+#, python-format
+msgid "Set a MIN_SCORE for POOTLE_TM_SERVER['%s']."
+msgstr ""
+
+#: checks.py:323
+#, python-format
+msgid "POOTLE_TM_SERVER['%s'] has a WEIGHT less than 0.0 or greater than 1.0"
+msgstr ""
+
+#: checks.py:325
+#, python-format
+msgid ""
+"Set a WEIGHT between 0.0 and 1.0 (both included) for POOTLE_TM_SERVER['%s']."
+msgstr ""
+
+#: checks.py:349
 msgid "The default 'admin' user still has a password set to 'admin'."
-msgstr ""
+msgstr "기본 'admin' 사용자는 여전히 'admin' 로 암호가 설정되어 있습니다."
 
-#: checks.py:286
+#: checks.py:351
 msgid "Remove the 'admin' user or change its password."
-msgstr ""
+msgstr "사용자 'admin' 를 제거하거나 암호를 변경하세요."
 
-#: checks.py:301
+#: checks.py:366
 msgid "Database connection does not implement on_commit."
-msgstr ""
+msgstr "데이터베이스 연결이 on_commit에 적용되지 않았습니다."
 
-#: checks.py:302
+#: checks.py:367
 msgid ""
 "Set the DATABASES['default']['ENGINE'] to use a backend from "
 "transaction_hooks.backends."
 msgstr ""
+"백엔드 사용을 위해 transaction_hooks.backends에서 DATABASES['default']"
+"['ENGINE']을 지정하세요."
 
-#: checks.py:322
-#, fuzzy
+#: checks.py:387
 msgid "Email server is not available."
-msgstr "Redis 서버는 %(host)s:%(port)s 에 유효하지 않습니다."
+msgstr "이메일 서버가 동작하지 않습니다."
 
-#: checks.py:323
+#: checks.py:388
 msgid "Review your email settings and make sure your email server is working."
-msgstr ""
+msgstr "당신의 email 설정을 살펴보고 email 서버가 동작하는지 확인하세요."
 
 #: core/browser.py:27
 msgid "Project"
@@ -1337,7 +1420,7 @@ msgstr "프로젝트"
 msgid "Progress"
 msgstr "진행 상태"
 
-#: core/browser.py:50 templates/browser/index.html:39
+#: core/browser.py:50 templates/browser/index.html:37
 msgid "Last updated"
 msgstr "최근 업데이트"
 
@@ -1355,19 +1438,18 @@ msgid "Last Activity"
 msgstr "최근 활동"
 
 #: core/browser.py:128
-#, fuzzy
 msgid "Back to language"
-msgstr "메인 페이지로 돌아가기"
+msgstr "언어로 돌아가기"
 
 #: core/browser.py:130
 msgid "Back to parent folder"
 msgstr "상위 폴더로 돌아가기"
 
-#: core/decorators.py:322
+#: core/decorators.py:323
 msgid "Insufficient rights to access this page."
 msgstr "이 페이지에 접근하기 위한 권한이 부족합니다."
 
-#: core/decorators.py:335 core/views.py:34
+#: core/decorators.py:336 core/views.py:34
 msgid "You do not have rights to administer Pootle."
 msgstr "Pootle을 관리할 권한이 없습니다."
 
@@ -1377,72 +1459,71 @@ msgstr "응답시간 초과"
 
 #: core/forms.py:133
 msgid "Enter a number"
-msgstr "숫자를 입력하십시오."
+msgstr "숫자를 입력하십시오"
 
 #: core/forms.py:148
 msgid "Incorrect"
 msgstr "잘못됨"
 
-#: core/helpers.py:44
+#: core/helpers.py:49
 msgid "User missing"
 msgstr "사용자없음"
 
 #. Translators: This refers to "All strings"
-#: core/helpers.py:56 templates/editor/_filters.html:6
+#: core/helpers.py:61 templates/editor/_filters.html:6
 msgid "All"
 msgstr "전부"
 
-#: core/helpers.py:60 templates/editor/_filters.html:8
+#: core/helpers.py:65 templates/editor/_filters.html:8
 msgid "Incomplete"
 msgstr "완료되지 않은"
 
-#: core/helpers.py:63 templates/editor/_filters.html:18
+#: core/helpers.py:68 templates/editor/_filters.html:18
 msgid "Checks"
 msgstr "확인"
 
-#: core/helpers.py:64 templates/editor/_filters.html:13
+#: core/helpers.py:69 templates/editor/_filters.html:13
 msgid "My submissions"
 msgstr "나의 제출건"
 
-#: core/helpers.py:65 templates/admin/dashboard.html:13
+#: core/helpers.py:70 templates/admin/dashboard.html:13
 msgid "Submissions"
 msgstr "제출"
 
 #. Translators: This is a type of filtering criterion that
 #. selects the strings that have been submitted by me at some point
 #. in time but have been overwritten by other users.
-#: core/helpers.py:66 templates/editor/_filters.html:17
+#: core/helpers.py:71 templates/editor/_filters.html:17
 msgid "My overwritten submissions"
 msgstr "나의 중복 제출"
 
-#: core/helpers.py:67
+#: core/helpers.py:72
 msgid "Overwritten submissions"
 msgstr "덮어쓴 제출"
 
 #: core/initdb.py:108
 msgid "Can access a project"
-msgstr "프로젝트에 접속 할 수 있습니다."
+msgstr "프로젝트에 접근 가능"
 
 #: core/initdb.py:112
 msgid "Cannot access a project"
-msgstr "프로젝트에 접속 할 수 없습니다."
+msgstr "프로젝트에 접근 불가"
 
 #: core/initdb.py:116
 msgid "Can make a suggestion for a translation"
-msgstr "번역을 위해 제안할 수 있습니다."
+msgstr "번역을 위한 제안단어를 만든다"
 
 #: core/initdb.py:120
 msgid "Can submit a translation"
-msgstr "번역을 제출할 수 있습니다."
+msgstr "번역을 제출 할 수 있음"
 
 #: core/initdb.py:124
-#, fuzzy
 msgid "Can review suggestions"
-msgstr "제안 검토"
+msgstr "제안 검토가능"
 
 #: core/initdb.py:128
 msgid "Can administrate a translation project"
-msgstr "번역 프로젝트를 관리할 수 있습니다."
+msgstr "번역 프로젝트를 관리할 수 있음"
 
 #: core/views.py:66
 msgid "You cannot access this page."
@@ -1450,14 +1531,13 @@ msgstr "이 페이지에 접근 할 수 없습니다."
 
 #: custom/templates/layout.html:11
 msgid "Getting Started"
-msgstr ""
+msgstr "시작하기"
 
 #: custom/templates/layout.html:15
-#, fuzzy
 msgid "License Terms"
-msgstr "라이선스"
+msgstr "사용 조건"
 
-#: custom/templates/profiles/_tabs.html:4 templates/layout.html:112
+#: custom/templates/profiles/_tabs.html:4 templates/layout.html:113
 #: templates/user/settings.html:4 templates/user/settings.html.py:7
 msgid "Settings"
 msgstr "설정"
@@ -1465,15 +1545,16 @@ msgstr "설정"
 #: middleware/errorpages.py:82
 #, python-format
 msgid "Error accessing %(filename)s, Filesystem sent error: %(errormsg)s"
-msgstr "%(filename) 접근 오류, 파일시스템 보내기 오류: %(errormsg)"
+msgstr "접근 에러 %(filename)s, 파일시스템 보내기 오류: %(errormsg)s"
 
 #: middleware/errorpages.py:119
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "You need to <a class=\"js-login\" href=\"%(login_link)s\">login</a> to "
 "access this page."
 msgstr ""
-"이 페이지에 접근하기 위해 <a href=\"%(login_link)s\">에서 로그인</a>하세요."
+"이 페이지 접근을 위해 <a class=\"js-login\" href=\"%(login_link)s\">로그인</"
+"a>필요합니다."
 
 #. Translators: Label that refers to the site's privacy policy
 #: strings.py:35
@@ -1505,7 +1586,7 @@ msgstr "사용조건"
 msgid "Terms of Service"
 msgstr "서비스 조건"
 
-#: templates/about.html:7 templates/layout.html:168
+#: templates/about.html:7 templates/layout.html:169
 msgid "About"
 msgstr "정보"
 
@@ -1521,11 +1602,11 @@ msgid ""
 "Read more on the <a href=\"http://pootle.translatehouse.org/\"><i class="
 "\"icon-external-link\"></i> project website</a>."
 msgstr ""
-"이 사이트는 Pootle 을 운영합니다 &madash;(번역을 하는 팀이나 단체에게 도움을 "
-"주기위해서 시작되었습니다). 이 커뮤니티 툴은 무료 소프트 웨어이며,  그리고 어"
-"느 팀이나 Pootle 커뮤니티에 기여할 수 있고 사용할수 있습니다. 추가적인 내용"
-"은 <a href=\"http://pootle.translatehouse.org/\"><i class=\"icon-external-"
-"link\"></i> 프로젝트 사이트</a>를 방문해 주시기 바랍니다."
+"이 사이트는 Pootle로 운영합니다 &mdash; 강력한 웹 소프트웨어는 번역 및 번역 "
+"관리를 할 수있는 팀이 권한을 부여합니다. 이 커뮤니티 툴은 무료 소프트 웨어이"
+"며, 그리고 어느 팀이나 Pootle 커뮤니티에 기여할 수 있고 사용 할 수 있습니다. "
+"추가적인 내용은 <a href=\"http://pootle.translatehouse.org/\"><i class="
+"\"icon-external-link\"></i> 프로젝트 사이트</a>를 방문해 주시기 바랍니다."
 
 #: templates/about.html:26
 #, python-format
@@ -1533,8 +1614,8 @@ msgid ""
 "Pootle %(pootle_version)s is powered by Translate Toolkit "
 "%(toolkit_version)s."
 msgstr ""
-"Pootle %(pootle_ver)s는 번역 도구 %(toolkit_ver)s을 바탕으로 작동하고있습니"
-"다."
+"Pootle %(pootle_version)s 는 Translate Toolkit %(toolkit_version)s 로 구동되"
+"고 있습니다."
 
 #: templates/account/email/email_confirmation_message.txt:2
 msgid "A Pootle account has been created for you using this email address."
@@ -1542,7 +1623,7 @@ msgstr "Pootle 계정이 생성되었습니다."
 
 #: templates/account/email/email_confirmation_message.txt:3
 msgid "To activate your account, follow this link:"
-msgstr "아래 링크를 클릭하여 계정을 활성화하십시오."
+msgstr "당신의 계정을 활성화 하기 위해, 링크를 따라 가세요:"
 
 #: templates/account/email/email_confirmation_message.txt:6
 msgid ""
@@ -1553,20 +1634,18 @@ msgstr ""
 "지를 무시하십시오."
 
 #: templates/account/email/email_confirmation_subject.txt:2
-#, fuzzy
 msgid "Pootle e-mail confirmation"
-msgstr "Pootle 등록"
+msgstr "Pootle 이메일 확인"
 
 #: templates/account/signup_closed.html:5
 #: templates/account/signup_closed.html:8
 #: templates/account/signup_closed.html:13
-#, fuzzy
 msgid "Registration Disabled"
-msgstr "등록 프로파일"
+msgstr "사용자 등록 닫힘"
 
 #: templates/account/signup_closed.html:14
 msgid "Registration is currently disabled. Please try again later."
-msgstr ""
+msgstr "현재 사용자 등록이 비활성 되었습니다. 나중에 시도해 주세요."
 
 #: templates/admin/_generic_formset.html:15
 #: templates/translation_projects/terminology/manage.html:49
@@ -1648,87 +1727,100 @@ msgid "Failed jobs"
 msgstr "실패한 작업"
 
 #: templates/admin/dashboard.html:64
-#, fuzzy
 msgid "System Checks"
-msgstr "검사 결과 표시"
+msgstr "시스템 점검"
 
 #: templates/admin/dashboard.html:74
 msgid "No issues have been detected. All is good!"
-msgstr ""
+msgstr "어떤 문제도 발견되지 않았음니다. 모두 좋음!"
 
 #: templates/admin/detailed_reports.html:6
 #, python-format
 msgid "Report for %(user)s, "
-msgstr "%(user)s 위한 레포트"
+msgstr "사용자 %(user)s에 대한 보고, "
 
-#: templates/admin/detailed_reports.html:129
+#: templates/admin/detailed_reports.html:136
 #, python-format
 msgid "Report for %(user)s"
 msgstr "%(user)s 레포트"
 
-#: templates/admin/detailed_reports.html:133
+#: templates/admin/detailed_reports.html:140
 #: templates/admin/reports/header.html:11 templates/user/detailed_stats.html:7
 msgid "Previous month"
 msgstr "이전 달"
 
-#: templates/admin/detailed_reports.html:135
+#: templates/admin/detailed_reports.html:142
 #: templates/admin/reports/header.html:15 templates/user/detailed_stats.html:9
 msgid "Next month"
 msgstr "다음 달"
 
-#: templates/admin/detailed_reports.html:142
+#: templates/admin/detailed_reports.html:149
 msgid "Local server time"
 msgstr "지역 서버 시간"
 
-#: templates/admin/detailed_reports.html:143
-msgid "Action"
-msgstr "동작"
-
-#: templates/admin/detailed_reports.html:144
+#: templates/admin/detailed_reports.html:150
 msgid "Unit"
 msgstr "단위"
 
-#: templates/admin/detailed_reports.html:145
+#: templates/admin/detailed_reports.html:151
+msgid "Action"
+msgstr "동작"
+
+#: templates/admin/detailed_reports.html:152
 msgid "Source words"
 msgstr "원본 문서"
 
-#: templates/admin/detailed_reports.html:146
+#: templates/admin/detailed_reports.html:153
 msgid "Similarity"
 msgstr "유사도"
 
-#: templates/admin/detailed_reports.html:147
+#: templates/admin/detailed_reports.html:154
 msgid "Words"
 msgstr "문구"
 
-#: templates/admin/detailed_reports.html:150
+#: templates/admin/detailed_reports.html:157
 msgid "Subtotal"
 msgstr "소계"
 
-#: templates/admin/detailed_reports.html:206
-#: templates/admin/detailed_reports.html:265
+#: templates/admin/detailed_reports.html:184
+#: templates/admin/detailed_reports.html:222
+msgid "MT"
+msgstr ""
+
+#: templates/admin/detailed_reports.html:218
+#, fuzzy
+msgid "Subactions"
+msgstr "기능"
+
+#: templates/admin/detailed_reports.html:219
+#, fuzzy
+msgid "Raw Translation"
+msgstr "번역"
+
+#: templates/admin/detailed_reports.html:249
+#: templates/admin/detailed_reports.html:308
 msgid "registered tasks"
 msgstr "등록된 업무"
 
-#: templates/admin/detailed_reports.html:217
+#: templates/admin/detailed_reports.html:260
 msgid "No activity recorded in a given period"
-msgstr "주어진 기간동안 기록된 활동이 없습니다."
+msgstr "주어진 기간동안 기록된 활동이 없습니다"
 
-#: templates/admin/detailed_reports.html:226
-#, fuzzy
+#: templates/admin/detailed_reports.html:269
 msgid "Suggestion (subtotal)"
-msgstr "번역(소계)"
+msgstr "제안 (소계)"
 
-#: templates/admin/detailed_reports.html:236
+#: templates/admin/detailed_reports.html:279
 msgid "Translation (subtotal)"
 msgstr "번역(소계)"
 
-#: templates/admin/detailed_reports.html:251
+#: templates/admin/detailed_reports.html:294
 msgid "Review (subtotal)"
-msgstr "검토(소계"
+msgstr "검토 (소계)"
 
-#: templates/admin/detailed_reports.html:283
+#: templates/admin/detailed_reports.html:326
 msgid "Please select a valid user."
-msgstr "활성화된 사용자를 선택하십시오"
+msgstr "유효한 사용자를 선택하세요."
 
 #: templates/admin/permissions.html:10
 msgid ""
@@ -1746,9 +1838,9 @@ msgid ""
 "in users will have by default, unless other specific rights were assigned to "
 "them."
 msgstr ""
-"\"nobody\"사용자란 로그인하지 않은 (익명 혹은 확인되지 않은) 사용자를 가리킵"
-"니다. \"default\"사용자는 모든 사용자가 별다른 권한 부여 없이 갖게 되는 권한"
-"을 가리킵니다."
+"”nobody”사용자란 로그인하지 않은 (익명 혹은 확인되지 않은) 사용자를 지칭합니"
+"다. “default“사용자는 모든 사용자가 별다른 권한 부여 없이 갖게 되는 권한을 가"
+"리킵니다."
 
 #: templates/admin/reports.html:58 templates/user/stats.html:60
 msgid "Daily activity"
@@ -1787,35 +1879,38 @@ msgid "Set Rates"
 msgstr "비율 설정"
 
 #: templates/admin/reports/user_rates_form.html:31
-#: templates/admin/staticpages/_form.html:24 templates/user/settings.html:40
+#: templates/admin/staticpages/_form.html:34
+#: templates/languages/admin/characters.html:20
+#: templates/user/settings.html:39
 msgid "Save"
 msgstr "저장"
 
-#: templates/admin/staticpages/_form.html:6
+#: templates/admin/staticpages/_form.html:7
 #: templates/translation_projects/terminology/manage.html:36
 msgid "Delete"
 msgstr "삭제"
 
-#: templates/admin/staticpages/_form.html:18
+#: templates/admin/staticpages/_form.html:21
 msgid "or"
 msgstr "또는"
 
-#: templates/admin/staticpages/_form.html:30
-#, fuzzy
+#: templates/admin/staticpages/_form.html:37
 msgid ""
 "Use <code>&lt;a href=\"<strong>#/page-slug</strong>\"&gt;Link text&lt;/a&gt;"
 "</code> code to provide links between static pages. Such links will be "
 "rewritten with full paths to static pages."
 msgstr ""
-" <code>&lt;a href=\"<strong>#/page-slug</strong>\"&gt;Link text&lt;/a&gt;</"
-"code>코드의 사용은 정적페이지 사이의 연결 고리를 제공한다. 그리고 이러한 링크"
-"는 정적페이지에 대한 모든 용도로 사용 된다."
+"코드 <code>&lt;a href=\"<strong>#/page-slug</strong>\"&gt;Link text&lt;/a&gt;"
+"</code> 사용은 정적페이지 사이의 링크들을 제공한다. 이러한 링크는 정적 페이지"
+"에 대한 전체 경로를 다시 작성됩니다."
 
-#: templates/admin/staticpages/_form.html:37
+#: templates/admin/staticpages/_form.html:44
 msgid ""
 "In Announcement pages use <code><strong>/xx/</strong></code> within URLs for "
 "a dynamic language code."
 msgstr ""
+"공지사항 페이지는 동적언어 코드를 위해서 URLs를 포함한 <code><strong>/xx/</"
+"strong></code>를 사용합니다."
 
 #: templates/admin/staticpages/_table.html:10
 msgid "Last Edited"
@@ -1840,7 +1935,7 @@ msgstr "뷰"
 
 #: templates/admin/staticpages/_table.html:37
 msgid "No pages yet."
-msgstr "페이지를 찾을 수 없습니다"
+msgstr "아직 페이지가 없습니다."
 
 #: templates/admin/staticpages/page_create.html:4
 msgid "Add"
@@ -1887,63 +1982,63 @@ msgid "View all"
 msgstr "전체 보기"
 
 #: templates/browser/_progressbar.html:3
-#, fuzzy, python-format
+#, python-format
 msgid "<span class=\"value translated\">0</span>%% translated"
-msgstr "<span class='value translated'>0</span>%% 번역됨"
+msgstr "<span class=\"value translated\">0</span>%% 번역 됨"
 
 #: templates/browser/_progressbar.html:4
-#, fuzzy, python-format
+#, python-format
 msgid "<span class=\"value fuzzy\">0</span>%% needs work"
-msgstr "<span class='value fuzzy'>0</span>%% 흐릿함"
+msgstr "<span class=\"value fuzzy\">0</span>%% 작업 필요"
 
 #: templates/browser/_progressbar.html:5
-#, fuzzy, python-format
+#, python-format
 msgid "<span class=\"value untranslated\">0</span>%% untranslated"
-msgstr "<span class='value untranslated'>0</span>%% 번역않됨"
+msgstr "<span class=\"value untranslated\">0</span>%% 미번역"
 
 #: templates/browser/index.html:13
 msgid "Expand details"
 msgstr "세부사항 추가"
 
-#: templates/browser/index.html:20
+#: templates/browser/index.html:19
 msgid "Translation Statistics"
 msgstr "번역 통계"
 
-#: templates/browser/index.html:43
+#: templates/browser/index.html:41
 msgid "Last action"
 msgstr "마지막 활동"
 
-#: templates/browser/index.html:51
+#: templates/browser/index.html:48
 msgid "Failing Checks"
 msgstr "검사 실패"
 
-#: templates/browser/index.html:102
+#: templates/browser/index.html:98
 msgid "This project is disabled and visible to administrators only."
-msgstr "이 프로젝트는 관리자에게만 허용가능하다"
+msgstr "이 프로젝트는 비활성되었고 관리자만 볼 수 있습니다."
 
-#: templates/browser/index.html:107
+#: templates/browser/index.html:103
 msgid ""
 "Some data on this page is currently being calculated, and the page will be "
 "refreshed automatically in <strong>30 seconds</strong>."
 msgstr ""
-"이 페이지의 일부 데이터가 없으면, 페이지는 자동으로 30초간 재부팅이 될 것이"
-"다."
+"이 페이지의 일부 데이터는 현재 계산되고 있으며, 자동적으로 <strong>30 초</"
+"strong>후 갱신 될 것입니다."
 
-#: templates/browser/index.html:111
+#: templates/browser/index.html:107
 msgid "Refresh now"
 msgstr "지금 새로고침"
 
-#: templates/browser/index.html:148
+#: templates/browser/index.html:144
 msgid "Congratulations! You have completed this task!"
-msgstr "축하합니다! 당신은 일을 마치셨습니다."
+msgstr "축하합니다! 당신은 이 일을 완료 했습니다!"
 
-#: templates/contact_form/xhr_contact_form.html:5 templates/layout.html:100
+#: templates/contact_form/xhr_contact_form.html:5 templates/layout.html:101
 msgid "Contact Us"
 msgstr "연락하기"
 
 #: templates/contact_form/xhr_contact_form.html:8
 msgid "Please fill in all the fields."
-msgstr ""
+msgstr "모든 항목을 채워 주세요."
 
 #: templates/contact_form/xhr_contact_form.html:19
 msgid "Send Message"
@@ -1954,11 +2049,9 @@ msgid "Thanks!"
 msgstr "감사합니다!"
 
 #: templates/contact_form/xhr_contact_form.html:26
-#, fuzzy
 msgid ""
 "We have received your message and will try to respond as soon as possible."
-msgstr ""
-"우리는 당신의 메시지를 받았습니다. 가능할때 답변하도록 노력 하겟습니다."
+msgstr "우리는 당신의 메시지를 받았고 가능한 빠른 답변을 드리겠습니다."
 
 #: templates/core/_top_scorers.html:8
 msgid "score"
@@ -1971,7 +2064,7 @@ msgstr "#%(position)s"
 
 #: templates/core/_top_scorers.html:30
 msgid "No user contributions yet."
-msgstr "사용자의 기여가 없음"
+msgstr "아직 사용자 기여가 없음."
 
 #: templates/core/captcha.html:4 templates/core/captcha.html.py:7
 #: templates/core/xhr_captcha.html:8
@@ -1986,16 +2079,15 @@ msgstr "서버 공격에 대한 대비로 실제 사용자인지를 확인합니
 
 #: templates/core/xhr_captcha.html:10
 msgid "Please answer this question:"
-msgstr "다음 질문에 답변하세요."
+msgstr "이 질문에 대답 하시오:"
 
 #: templates/core/xhr_captcha.html:13
 msgid "Confirm"
 msgstr "확인"
 
 #: templates/editor/_actions.html:5
-#, fuzzy
 msgid "Go back to browsing"
-msgstr "개요로 돌아가시오"
+msgstr "탐색으로 돌아가기"
 
 #: templates/editor/_filters.html:12
 msgid "My suggestions"
@@ -2011,31 +2103,31 @@ msgstr "기본 순서"
 
 #: templates/editor/_toolbar.html:8
 msgid "Important first"
-msgstr ""
+msgstr "중요한 것 우선"
 
 #: templates/editor/_toolbar.html:10
 msgid "Newest first"
-msgstr "가장 최신항목중 첫번째"
+msgstr "최근 우선"
 
 #: templates/editor/_toolbar.html:11
 msgid "Oldest first"
-msgstr "가장 오래된 항목"
+msgstr "오래된 것 우선"
 
 #: templates/editor/_toolbar.html:17
 msgid "Go to the previous string (Ctrl+Up)"
-msgstr "이전 문자열로 가시오(Ctrl+Up)"
+msgstr "이전 문자열로 이동(Ctrl+Up)"
 
 #: templates/editor/_toolbar.html:20
 msgid ""
 "Current string number (Ctrl+Shift+U)<br/><br/>Type in the number and press "
 "Enter<br/>to go to any position"
 msgstr ""
-"최신 문자열 숫자 (Ctrl+Shift+U)<br/><br/>수를 입력하고 엔터를 누르시오<br/>다"
-"른 위치로 가기위해"
+"현재 문자열 번호 (Ctrl+Shift+U)<br/><br/>이동을 원하는 위치의 숫자를<br/>입력"
+"하고 엔터를 누르세요"
 
 #: templates/editor/_toolbar.html:22
 msgid "Total strings"
-msgstr "전체 문자열"
+msgstr "총 문자열"
 
 #: templates/editor/_toolbar.html:25
 msgid "Go to the next string (Ctrl+Down)"
@@ -2057,10 +2149,10 @@ msgstr "모든 언어"
 
 #: templates/editor/export_view.html:143
 msgid "No strings."
-msgstr "문자열 없음"
+msgstr "문자열 없음."
 
 #: templates/editor/export_view.html:149
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "We displayed the first unit out of %(total_count)s. Please refine your "
 "search."
@@ -2068,35 +2160,35 @@ msgid_plural ""
 "We displayed the first %(unit_count)s units out of %(total_count)s. Please "
 "refine your search."
 msgstr[0] ""
-"우리는 %(total_count)s의 첫번째 %(count)s 유닛을 출력했다. 당신의 검색을 정제"
-"해주시오"
+"우리는 %(total_count)s 중 %(unit_count)s 유닛을 표시했습니다. 검색을 구체화하"
+"십시오."
 
 #: templates/editor/main.html:4 templates/languages/_nav.html:10
 #: templates/projects/_nav.html:10 templates/projects/all/_nav.html:10
 #: templates/translation_projects/_nav.html:10
 msgid "Translate"
-msgstr "번역"
+msgstr "번역하기"
 
 #: templates/editor/units/edit.html:12
 #, python-format
 msgid "<a href=\"%(url)s\">Unit #%(id)s</a>"
-msgstr "<a href=\"%(url)s\">Unit #%(id)s</a>"
+msgstr "<a href=\"%(url)s\">유닛 #%(id)s</a>"
 
 #: templates/editor/units/edit.html:19
 msgid "Priority:"
-msgstr ""
+msgstr "우선 순위:"
 
 #: templates/editor/units/edit.html:26
 msgid "Context:"
-msgstr "전후 사정"
+msgstr "문맥:"
 
 #: templates/editor/units/edit.html:36
 msgid "Locations:"
-msgstr "장소"
+msgstr "위치:"
 
 #: templates/editor/units/edit.html:46
 msgid "Terminology:"
-msgstr "용어"
+msgstr "용어:"
 
 #: templates/editor/units/edit.html:49
 msgid "Insert the translated term into the editor"
@@ -2104,7 +2196,7 @@ msgstr "편집기에 번역된 용어 삽입"
 
 #: templates/editor/units/edit.html:62
 msgid "Comments:"
-msgstr "코멘트"
+msgstr "코멘트:"
 
 #: templates/editor/units/edit.html:72
 msgid "Click to open the image in a popup"
@@ -2114,139 +2206,139 @@ msgstr "팝업창에 열린 이미지를 클릭하시오"
 msgid "Screenshots..."
 msgstr "스크린샷..."
 
-#: templates/editor/units/edit.html:111 templates/editor/units/edit.html:139
+#: templates/editor/units/edit.html:111 templates/editor/units/edit.html:138
 msgid "Copy into translation"
 msgstr "번역문에 붙여넣기"
 
-#: templates/editor/units/edit.html:134
+#: templates/editor/units/edit.html:133
 msgid "Report a problem with this string"
 msgstr "이 문자열에 있는 문제 보고하기"
 
-#: templates/editor/units/edit.html:158 templates/editor/units/edit.html:169
-#: templates/editor/units/edit.html:262
+#: templates/editor/units/edit.html:156 templates/editor/units/edit.html:167
+#: templates/editor/units/edit.html:259
 msgid "Submit"
 msgstr "제출"
 
-#: templates/editor/units/edit.html:159
+#: templates/editor/units/edit.html:157
 msgid "Submit translation and go to the next string (Ctrl+Enter)"
 msgstr "번역 제출 그리고 다음 문자열 가기 (Ctrl+Enter)"
 
-#: templates/editor/units/edit.html:164 templates/editor/units/edit.html:170
+#: templates/editor/units/edit.html:162 templates/editor/units/edit.html:168
 msgid "Suggest"
 msgstr "제안"
 
-#: templates/editor/units/edit.html:165
+#: templates/editor/units/edit.html:163
 msgid "Suggest translation and go to the next string (Ctrl+Enter)"
 msgstr "번역 제출 그리고 다음 문자열 가기(Ctrl+Enter)"
 
-#: templates/editor/units/edit.html:169
+#: templates/editor/units/edit.html:167
 msgid "Switch to translation mode (Ctrl+Shift+Space)"
 msgstr "번역 모드 바꾸기(Ctrl+Shift+Space)"
 
-#: templates/editor/units/edit.html:170
+#: templates/editor/units/edit.html:168
 msgid "Switch to suggestion mode (Ctrl+Shift+Space)"
 msgstr "제안 모드 바꾸기 (Ctrl+Shift+Space)"
 
-#: templates/editor/units/edit.html:175
+#: templates/editor/units/edit.html:173
 msgid "Mark this string as needing further work (Ctrl+Space)"
 msgstr "작업이 더 필요한 문자열 표시하기 (Ctrl+Space)"
 
-#: templates/editor/units/edit.html:190
+#: templates/editor/units/edit.html:188
 msgid "Show Timeline"
 msgstr "타임라인 표시"
 
-#: templates/editor/units/edit.html:192
+#: templates/editor/units/edit.html:190
 msgid "Add Comment"
 msgstr "주석 넣기"
 
-#: templates/editor/units/edit.html:194
+#: templates/editor/units/edit.html:192
 msgid "Raw View"
 msgstr "작업하나도 않한 뷰"
 
-#: templates/editor/units/edit.html:204
+#: templates/editor/units/edit.html:202
 #, python-format
 msgid "reviewed by <a href=\"%(profile_url)s\">%(reviewer)s</a>"
-msgstr "<a href=\"%(profile_url)s\">%(reviewer)s</a> 검토함"
+msgstr "검토자 <a href=\"%(profile_url)s\">%(reviewer)s</a>의해 검토 됨"
 
-#: templates/editor/units/edit.html:214
+#: templates/editor/units/edit.html:212
 msgid "Insert RLM (Right-To-Left Mark) into the editor"
 msgstr "편집기에 RLM (Right-To-Left Mark) 삽입하기"
 
-#: templates/editor/units/edit.html:217
+#: templates/editor/units/edit.html:215
 msgid "Insert LRM (Left-To-Right Mark) into the editor"
 msgstr "편집기에 LRM (Left-To-Right Mark) 삽입하기"
 
-#: templates/editor/units/edit.html:220
+#: templates/editor/units/edit.html:218
 msgid "Insert RLE (Right-To-Left Embedding) into the editor"
 msgstr "편집기에 RLE (Right-To-Left Embedding) 삽입하기"
 
-#: templates/editor/units/edit.html:223
+#: templates/editor/units/edit.html:221
 msgid "Insert LRE (Left-To-Right Embedding) into the editor"
 msgstr "편집기에 LRE (Left-To-Right Embedding) 삽입하기"
 
-#: templates/editor/units/edit.html:226
+#: templates/editor/units/edit.html:224
 msgid "Insert RLO (Right-To-Left Override) into the editor"
 msgstr "편집기에 RLO (Right-To-Left Override) 삽입하기"
 
-#: templates/editor/units/edit.html:229
+#: templates/editor/units/edit.html:227
 msgid "Insert LRO (Left-To-Right Override) into the editor"
 msgstr "편집기에 LRO (Left-To-Right Override) 삽입하기"
 
-#: templates/editor/units/edit.html:232
+#: templates/editor/units/edit.html:230
 msgid "Insert PDF (Pop Directional Format ) into the editor"
 msgstr "편집기에 PDF (Pop Directional Format ) 삽입하기"
 
-#: templates/editor/units/edit.html:235
+#: templates/editor/units/edit.html:233
 msgid "Insert ZWJ (Zero Width Joiner) into the editor"
 msgstr "편집기에 ZWJ (Zero Width Joiner) 삽입하기"
 
-#: templates/editor/units/edit.html:238
+#: templates/editor/units/edit.html:236
 msgid "Insert ZWNJ (Zero Width Non Joiner) into the editor"
 msgstr "편집기에 ZWNJ (Zero Width Non Joiner) 삽입하기"
 
-#: templates/editor/units/edit.html:245
+#: templates/editor/units/edit.html:243
 msgid "Insert this symbol into the editor"
 msgstr "편집기에 이 기호 삽입하기"
 
-#: templates/editor/units/edit.html:282
+#: templates/editor/units/edit.html:279
 msgid "User suggestions"
 msgstr "사용자 제안"
 
-#: templates/editor/units/edit.html:300
+#: templates/editor/units/edit.html:298
 msgid "Accept suggestion"
 msgstr "제안 사항 수락"
 
-#: templates/editor/units/edit.html:305
+#: templates/editor/units/edit.html:303
 msgid "Reject suggestion"
 msgstr "제안 사항 거부"
 
-#: templates/editor/units/edit.html:312
+#: templates/editor/units/edit.html:309
 msgid "Remove suggestion"
 msgstr "제안 사항 제거"
 
-#: templates/editor/units/edit.html:327
+#: templates/editor/units/edit.html:323
 msgid "A long time ago"
 msgstr "오래 전"
 
 #: templates/editor/units/term_edit.html:9
 msgid "Comment: "
-msgstr "코멘트"
+msgstr "코멘트: "
 
 #: templates/editor/units/xhr_checks.html:5
-#, fuzzy
 msgid "Critical issues with the translation"
-msgstr "번역문의 잠재적 문제"
+msgstr "번역의 Critical 이슈들"
 
 #: templates/editor/units/xhr_checks.html:5
-#, fuzzy
 msgid "Critical errors:"
-msgstr "치명적인 오류 고치기"
+msgstr "Critical 오류들:"
 
 #: templates/editor/units/xhr_checks.html:12
+#: templates/editor/units/xhr_checks.html:32
 msgid "Mute quality check"
 msgstr "자동 검토 사항 제거"
 
 #: templates/editor/units/xhr_checks.html:13
+#: templates/editor/units/xhr_checks.html:33
 msgid "Unmute quality check"
 msgstr "자동 검토 사항 제거"
 
@@ -2256,15 +2348,15 @@ msgstr "번역문의 잠재적 문제"
 
 #: templates/editor/units/xhr_checks.html:25
 msgid "Watch out for:"
-msgstr ""
+msgstr "살펴봐야 할 것들:"
 
-#: templates/editor/units/xhr_comment.html:15
+#: templates/editor/units/xhr_comment.html:14
 msgid "Remove comment"
 msgstr "코멘트 제거"
 
-#: templates/editor/units/xhr_comment.html:18
+#: templates/editor/units/xhr_comment.html:17
 msgid "Last comment:"
-msgstr "마지막 코멘트"
+msgstr "마지막 코멘트:"
 
 #: templates/editor/units/xhr_timeline.html:3
 msgid "Timeline"
@@ -2274,11 +2366,17 @@ msgstr "타임라인"
 msgid "Last comment removed"
 msgstr "마지막 코멘트 제거"
 
-#: templates/editor/units/xhr_timeline.html:37
-msgid "check"
-msgstr "확인"
+#: templates/editor/units/xhr_timeline.html:38
+#, fuzzy, python-format
+msgid "Muted <a href=\"%(check_url)s\">%(check_name)s</a> check"
+msgstr "검토자 <a href=\"%(profile_url)s\">%(reviewer)s</a>의해 검토 됨"
 
-#: templates/editor/units/xhr_timeline.html:46
+#: templates/editor/units/xhr_timeline.html:42
+#, fuzzy, python-format
+msgid "Unmuted <a href=\"%(check_url)s\">%(check_name)s</a> check"
+msgstr "검토자 <a href=\"%(profile_url)s\">%(reviewer)s</a>의해 검토 됨"
+
+#: templates/editor/units/xhr_timeline.html:54
 msgid "Unit created"
 msgstr "유닛 만들기"
 
@@ -2304,7 +2402,7 @@ msgstr "이 페이지에 접근할 수 있는 권한이 없습니다."
 
 #: templates/errors/404.html:4 templates/errors/404.html.py:8
 msgid "Page Not Found"
-msgstr "페이지를 찾을 수 없습니다."
+msgstr "페이지를 찾을 수 없습니다"
 
 #: templates/errors/404.html:10
 msgid "We're sorry, but the requested page could not be found."
@@ -2320,7 +2418,7 @@ msgstr "오류가 발생되었습니다. 잠시만 기다려 주십시오."
 
 #: templates/errors/500.html:16
 msgid "Exception:"
-msgstr "예외"
+msgstr "예외:"
 
 #: templates/errors/500.html:21
 #, python-format
@@ -2336,75 +2434,69 @@ msgid "Database Error"
 msgstr "데이타베이스 에러"
 
 #: templates/errors/db.html:11
-#, fuzzy
 msgid ""
 "Pootle can't connect to the database, the database is not initialized yet, "
 "or a schema upgrade is needed before continuing."
 msgstr ""
-"Pootle은 이 데이터베이스에 연결할수 없고, 이 데이터베이스는 아직 초기화 돼지 "
-"않았거나 개요 업그레이드가 진행 되기전에 필요로 합니다"
+"데이터 베이스가 아직 초기화되지 않아서, Pootle이 데이터베이스에 연결할수 없거"
+"나, 계속 진행하기 전에 스키마 업데이트가 필요합니다."
 
 #: templates/errors/db.html:18
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "Please read the <a href=\"%(url)s\">Pootle documentation</a> for "
 "installation and upgrade instructions. Contact the server administrator if "
 "you feel this is a mistake."
 msgstr ""
-"\n"
-"설치 및 업그레이드 명령을 위해 \n"
-"<a href=\"%(url)s\">Pootle 문서</a>를 읽어주십시오.  만약 오류가 발견된다"
-"면  \n"
-"서버 관리자에게 연락해주세요 "
+"설치 및 업그레이드 명령을 위해서 <a href=\"%(url)s\">Pootle 문서</a>를 읽어 "
+"주십시오. 만약 이게 실수라고 생각되면 서버 관리자에게 연락해 주세요."
 
 #: templates/errors/db.html:26
 msgid "The reported error was:"
-msgstr "보고된 에러 :"
+msgstr "보고 된 에러:"
 
 #: templates/languages/_nav.html:5 templates/projects/_nav.html:5
 #: templates/projects/all/_nav.html:5
 #: templates/translation_projects/_nav.html:5
 msgid "Browse"
-msgstr ""
+msgstr "탐색"
 
 #: templates/languages/admin/permissions.html:9
 msgid "Below you can add, edit, and delete the permissions for this language."
 msgstr "아래에서 이 언어의 권한을 추가, 수정, 삭제할 수 있습니다."
 
-#: templates/layout.html:80
-msgid "Pootle requires JavaScript"
-msgstr "Pootle은 JavaScript를 요구합니다."
-
 #: templates/layout.html:81
+msgid "Pootle requires JavaScript"
+msgstr "Pootle은 JavaScript가 필요 합니다"
+
+#: templates/layout.html:82
 msgid ""
 "Please enable JavaScript in your browser preferences and reload the page."
 msgstr ""
-"당신의 브라우저 기본설정에 있는 JavaScript를 사용하고 그 페이지를 다시 저장하"
-"십시오"
+"당신의 브라우저 속성서 JavaScript를 활성화 하고 페이지를 다시 불러오세요."
 
-#: templates/layout.html:90
+#: templates/layout.html:91
 msgid "skip to navigation"
 msgstr "네비게이션으로 건너뛰기"
 
-#: templates/layout.html:111
+#: templates/layout.html:112
 msgid "Public Profile"
 msgstr "공개 프로파일"
 
-#: templates/layout.html:113 templates/user/stats.html:46
+#: templates/layout.html:114 templates/user/stats.html:46
 #: templates/user/stats.html.py:50
 msgid "Statistics"
 msgstr "통계"
 
-#: templates/layout.html:115
+#: templates/layout.html:116
 msgid "Admin"
 msgstr "관리"
 
-#: templates/layout.html:118
-#, fuzzy
+#: templates/layout.html:119
 msgid "Sign out"
 msgstr "로그아웃"
 
-#: templates/layout.html:122
+#: templates/layout.html:123
 msgid "Sign In"
 msgstr "로그인"
 
@@ -2417,6 +2509,8 @@ msgid ""
 "There are no templates for this project, so adding new languages from this "
 "screen is disabled."
 msgstr ""
+"이 프로젝트에 대한 템플릿들이 업습니다, 그래서이 화면에서 새로운 언어를 추가"
+"하는 것은 불가능합니다."
 
 #: templates/projects/admin/permissions.html:11
 msgid "Below you can add, edit, and delete the permissions for this project."
@@ -2428,21 +2522,20 @@ msgid ""
 "This static page is inactive and visible to administrators only. You can "
 "activate it by <a href=\"%(edit_url)s\">editing its properties</a>"
 msgstr ""
-"이 정적 페이지는 비활성화되고 관리자만 볼 수 있습니다. <a href=\"%(edit_url)s"
-"\">editing its properties</a>을 통해 활성화할 수 있습니다."
+"이 정적 페이지는 비활성화되고 관리자만 볼 수 있습니다. 당신은 활성화 할 수 있"
+"습니다 <a href=\"%(edit_url)s\">이 속성을 수정해서</a>"
 
 #: templates/staticpages/agreement.html:3
 msgid "Action Required"
-msgstr "동작이 필요합니다."
+msgstr "동작이 필요합니다"
 
 #: templates/staticpages/agreement.html:4
 msgid "Before continuing, you must read and accept the following documents."
 msgstr "진행하기 전에 당신은 안내문을 읽고 숙지해야 합니다."
 
 #: templates/staticpages/agreement.html:17
-#, fuzzy
 msgid "No thanks. Sign out"
-msgstr "괞찮아요 로그아웃 할게요"
+msgstr "필요없어요. 로그아웃"
 
 #: templates/staticpages/agreement.html:20
 msgid "Continue"
@@ -2460,7 +2553,7 @@ msgstr "아래에서 이 번역 프로젝트의 권한을 추가, 수정, 삭제
 
 #: templates/translation_projects/terminology/_term_edit.html:11
 msgid "Description..."
-msgstr "설명"
+msgstr "설명..."
 
 #: templates/translation_projects/terminology/_term_edit.html:18
 msgid "Details..."
@@ -2480,14 +2573,22 @@ msgstr "용어"
 
 #: templates/translation_projects/terminology/manage.html:58
 msgid "No terminology file has been found"
-msgstr ""
+msgstr "찾아진 용어파일이 없습니다"
 
-#: templates/translation_projects/terminology/manage.html:60
+#. Translators: 'pootle-terminology' and 'Terminology' are not
+#. translated
+#: templates/translation_projects/terminology/manage.html:62
 msgid ""
-"In order to use the terminology feature, make sure to add to your "
-"translation project a \"pootle-terminology\" file named after your project's "
-"extension."
+"In order to use the terminology feature, make sure to add a terminology file "
+"to your translation project. The terminology file must be named 'pootle-"
+"terminology' and use the same file extension (format) as the rest of the "
+"project files.  This custom terminology will be used in addition to any "
+"terminology suggestions provided by the 'Terminology' project."
 msgstr ""
+"용어의 기능을 사용하려면, 당신의 번역 프로젝트에 용어파일이 추가되었는지 확인"
+"해야 합니다. 용어파일의 이름은 'pootle-terminoloy'라고 해야 하며 그 프로젝트"
+"의 나머지 파일들과 같은 파일 확장자(형식)을 사용해야 합니다.  이 사용자 정의 "
+"용어는 '용어'프로젝트에서 제공하는 용어제안에 추가되어 사용됩니다."
 
 #: templates/translation_projects/terminology/stores.html:7
 msgid "Here you can manage the terms in the terminology files."
@@ -2505,8 +2606,8 @@ msgstr ""
 #: templates/user/profile.html:13
 msgid "You can set or change your avatar image at www.gravatar.com"
 msgstr ""
-"당신은 www.gravatar.com에서 당신의 아바타 이미지를 바꾸거나 설정하실 수 있습"
-"니다."
+"당신은 www.gravatar.com에서 당신의 아바타 이미지를 지정하거나 변경 할 수 있습"
+"니다"
 
 #: templates/user/profile.html:16
 msgid "Anonymous User"
@@ -2519,7 +2620,7 @@ msgstr "점수:"
 #: templates/user/profile.html:31
 #, python-format
 msgid "My current score at %(server_title)s is %(score)s "
-msgstr "%(server_title)s의 내 현재 점수는 %(score)s 입니다"
+msgstr "내 현재 점수는 %(server_title)s에서 %(score)s점 입니다 "
 
 #: templates/user/profile.html:31 templates/user/profile.html.py:43
 msgid "Tweet this!"
@@ -2534,12 +2635,13 @@ msgstr "지난 달에 기여가 없음"
 msgid ""
 "I am #%(pos)s contributor in %(lang_name)s for this month at "
 "%(server_title)s! "
-msgstr "나는 %(server_title)s에서 이번 달 %(lang_name)s의 #%(pos)s 기여자이다."
+msgstr ""
+"이번달 %(server_title)s의 %(lang_name)s번역에서 기여자 #%(pos)s등입니다! "
 
 #: templates/user/profile.html:44
 #, python-format
 msgid "#%(pos)s contributor in %(lang_name)s for this month"
-msgstr "이번 달%(lang_name)s의 #%(pos)s의 기여자 "
+msgstr "이번 달 %(lang_name)s번역의 #%(pos)s등 기여자 입니다"
 
 #: templates/user/profile.html:49
 #, python-format
@@ -2549,7 +2651,7 @@ msgstr "이번 달 <a href=\"%(url)s\">%(lang_name)s</a>의 #%(pos)s 기여자"
 
 #: templates/user/profile.html:60
 msgid "Latest activity:"
-msgstr "최근 활동"
+msgstr "최근 활동:"
 
 #: templates/user/profile.html:72
 msgid "My Website"
@@ -2564,8 +2666,8 @@ msgid ""
 "Show others who you are, tell about yourself<br/>and make your public "
 "profile look gorgeous!"
 msgstr ""
-"네가 누군지 스스로 말해, 다른 사람들에게 보여줘</br>그리고 당신의 공개된 프로"
-"필을 끝내주게 만들어!"
+"당신이 누구인지, 다른 사람에게 보여주기 위한<br/>공개 프로필을 멋지게 꾸며 보"
+"세요!"
 
 #: templates/user/profile.html:97
 msgid ""
@@ -2601,17 +2703,18 @@ msgid "Hourly Rate:"
 msgstr "한 시간당 속도:"
 
 #: templates/user/settings.html:12
-#, fuzzy
 msgid "User Account"
-msgstr "계정 등록"
+msgstr "사용자 계정"
 
 #: templates/user/settings.html:14
 msgid ""
 "Do you want to change your password? Click the 'Reset Password' button which "
 "will initiate the process of setting a new password."
 msgstr ""
+"암호변경을 원하싶니까? 새 암호를 설정하는 절차를 진행 하기위해 '암호 재설정' "
+"버튼을 클릭하세요."
 
-#: templates/user/settings.html:26
+#: templates/user/settings.html:25
 msgid "Reset Password"
 msgstr "비밀번호 초기화"
 
@@ -2628,13 +2731,15 @@ msgid "Come and join us!"
 msgstr "와서 우리와 함께 참여하세요!"
 
 #: templates/welcome.html:19
-#, fuzzy
 msgid "Sign in"
 msgstr "로그인"
 
 #: templates/welcome.html:32
 msgid "Top Contributors This Month"
 msgstr "이 달의 기여자 순위"
+
+#~ msgid "check"
+#~ msgstr "확인"
 
 #~ msgid "Source Terms"
 #~ msgstr "원본 표현"

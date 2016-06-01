@@ -24,7 +24,6 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
-from translate.filters.decorators import Category
 from translate.lang import data
 
 from pootle.core.dateparse import parse_datetime
@@ -356,7 +355,7 @@ def _filter_ctx_units(units_qs, unit, how_many, gap=0):
         result['before'] = _build_units_list(before, reverse=True)
         result['before'].reverse()
 
-    #FIXME: can we avoid this query if length is known?
+    # FIXME: can we avoid this query if length is known?
     if how_many:
         after = units_qs.filter(store=unit.store_id,
                                 index__gt=unit.index)[gap:how_many+gap]
@@ -432,11 +431,7 @@ def _get_critical_checks_snippet(request, unit):
     :return: rendered HTML snippet with the failing checks, or `None` if
         there are no critical failing checks.
     """
-    has_critical_checks = unit.qualitycheck_set.filter(
-        category=Category.CRITICAL,
-    ).exists()
-
-    if not has_critical_checks:
+    if not unit.has_critical_checks():
         return None
 
     can_review = check_user_permission(request.profile, 'review',
@@ -508,7 +503,11 @@ def get_units(request):
                 break
 
         if sort_by_field is None or sort_on == 'units':
-            uid_list = list(step_queryset.values_list('id', flat=True))
+            # Since `extra()` has been used before, it's necessary to explicitly
+            # request the `store__pootle_path` field. This is a subtetly in
+            # Django's ORM.
+            uid_list = [u['id'] for u in step_queryset.values('id',
+                                                              'store__pootle_path')]
         else:
             # Not using `values_list()` here because it doesn't know about all
             # existing relations when `extra()` has been used before in the
@@ -519,7 +518,9 @@ def get_units(request):
             # `values('sort_by_field', 'id')` with `id` otherwise
             # Django looks for `sort_by_field` field in the initial table.
             # https://code.djangoproject.com/ticket/19434
-            uid_list = [u['id'] for u in step_queryset.values('id', 'sort_by_field')]
+            uid_list = [u['id'] for u in step_queryset.values('id',
+                                                              'sort_by_field',
+                                                              'store__pootle_path')]
 
         if len(uids) == 1:
             try:
@@ -548,13 +549,6 @@ def get_units(request):
         response['uIds'] = uid_list
 
     return JsonResponse(response)
-
-
-def _is_filtered(request):
-    """Checks if unit list is filtered."""
-    return ('filter' in request.GET or 'checks' in request.GET or
-            'user' in request.GET or
-            ('search' in request.GET and 'sfields' in request.GET))
 
 
 @ajax_required
@@ -637,11 +631,9 @@ def timeline(request, unit):
                 entry.update({
                     'check_name': check_name,
                     'check_display_name': check_names[check_name],
-                    'checks_url': reverse('pootle-checks-descriptions'),
-                    'action': {
-                                SubmissionTypes.MUTE_CHECK: 'Muted',
-                                SubmissionTypes.UNMUTE_CHECK: 'Unmuted'
-                              }.get(item.type, '')
+                    'checks_url': u''.join([
+                        reverse('pootle-checks-descriptions'), '#', check_name,
+                    ]),
                 })
             else:
                 entry['new_value'] = to_python(item.new_value)
@@ -771,8 +763,16 @@ def get_edit_unit(request, unit):
     store = unit.store
     directory = store.parent
     user = request.profile
-    alt_src_langs = get_alt_src_langs(request, user, translation_project)
     project = translation_project.project
+
+    alt_src_langs = get_alt_src_langs(request, user, translation_project)
+    altsrcs = find_altsrcs(unit, alt_src_langs, store=store, project=project)
+    source_language = translation_project.project.source_language
+    sources = {
+        unit.store.translation_project.language.code: unit.target_f.strings
+        for unit in altsrcs
+    }
+    sources[source_language.code] = unit.source_f.strings
 
     priority = None
 
@@ -809,13 +809,12 @@ def get_edit_unit(request, unit):
         'user': request.user,
         'project': project,
         'language': language,
-        'source_language': translation_project.project.source_language,
+        'source_language': source_language,
         'cantranslate': check_user_permission(user, "translate", directory),
         'cansuggest': check_user_permission(user, "suggest", directory),
         'canreview': check_user_permission(user, "review", directory),
         'is_admin': check_user_permission(user, 'administrate', directory),
-        'altsrcs': find_altsrcs(unit, alt_src_langs, store=store,
-                                project=project),
+        'altsrcs': altsrcs,
     }
 
     if translation_project.project.is_terminology or store.is_terminology:
@@ -823,23 +822,13 @@ def get_edit_unit(request, unit):
     else:
         t = loader.get_template('editor/units/edit.html')
     c = RequestContext(request, template_vars)
-    json['editor'] = t.render(c)
-    json['tm_suggestions'] = unit.get_tm_suggestions()
-    json['is_obsolete'] = unit.isobsolete()
 
-    # Return context rows if filtering is applied but
-    # don't return any if the user has asked not to have it
-    current_filter = request.GET.get('filter', 'all')
-    show_ctx = request.COOKIES.get('ctxShow', 'true')
-
-    if ((_is_filtered(request) or current_filter not in ('all',)) and
-        show_ctx == 'true'):
-        # TODO: review if this first 'if' branch makes sense
-        if translation_project.project.is_terminology or store.is_terminology:
-            json['ctx'] = _filter_ctx_units(store.units, unit, 0)
-        else:
-            ctx_qty = int(request.COOKIES.get('ctxQty', 1))
-            json['ctx'] = _filter_ctx_units(store.units, unit, ctx_qty)
+    json.update({
+        'editor': t.render(c),
+        'tm_suggestions': unit.get_tm_suggestions(),
+        'is_obsolete': unit.isobsolete(),
+        'sources': sources,
+    })
 
     return JsonResponse(json)
 
@@ -965,8 +954,8 @@ def suggest(request, unit):
     if form.is_valid():
         if form.instance._target_updated:
             # TODO: Review if this hackish method is still necessary
-            #HACKISH: django 1.2 stupidly modifies instance on
-            # model form validation, reload unit from db
+            # HACKISH: django 1.2 stupidly modifies instance on model form
+            # validation, reload unit from db
             unit = Unit.objects.get(id=unit.id)
             unit.add_suggestion(
                 form.cleaned_data['target_f'],
@@ -1051,15 +1040,10 @@ def accept_suggestion(request, unit, suggid):
 @ajax_required
 @get_unit_context('review')
 def toggle_qualitycheck(request, unit, check_id):
-    json = {
-        'udbid': unit.id,
-        'checkid': check_id,
-    }
-
     try:
-        unit.toggle_qualitycheck(check_id,
-            bool(request.POST.get('mute')), request.profile)
+        unit.toggle_qualitycheck(check_id, bool(request.POST.get('mute')),
+                                 request.profile)
     except ObjectDoesNotExist:
         raise Http404
 
-    return JsonResponse(json)
+    return JsonResponse({})

@@ -22,9 +22,13 @@ from pootle_store.models import Store
 
 class Command(PootleCommand):
     option_list = PootleCommand.option_list + (
-        make_option("--path", action="store", dest="pootle_path",
-                    help="Export a single file"),
-        )
+        make_option(
+            "--path",
+            action="store",
+            dest="pootle_path",
+            help="Export a single file",
+        ),
+    )
     help = "Export a Project, Translation Project, or path. " \
            "Multiple files will be zipped."
 
@@ -43,9 +47,8 @@ class Command(PootleCommand):
         if self.projects:
             project_query = project_query.filter(code__in=self.projects)
 
-        path = options.get("pootle_path")
-        if path:
-            return self.handle_path(path, **options)
+        if options['pootle_path'] is not None:
+            return self.handle_path(options['pootle_path'], **options)
 
         # support exporting an entire project
         if self.projects and not self.languages:
@@ -67,7 +70,7 @@ class Command(PootleCommand):
                 tp_query = tp_query.filter(language__code__in=self.languages)
 
             for tp in tp_query.iterator():
-                self.do_translation_project(tp, self.path, **options)
+                self.do_translation_project(tp, **options)
 
     def handle_translation_project(self, translation_project, **options):
         stores = translation_project.stores.live()

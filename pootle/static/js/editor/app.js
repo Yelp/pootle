@@ -6,52 +6,58 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-var $ = require('jquery');
-var _ = require('underscore');
+import $ from 'jquery';
+import _ from 'underscore';
 
 // jQuery plugins
-require('jquery-caret');
-require('jquery-cookie');
-require('jquery-easing');
-require('jquery-highlightRegex');
-require('jquery-history');
-require('jquery-jsonp');
-require('jquery-serializeObject');
-require('jquery-utils');
+import 'jquery-caret';
+import 'jquery-easing';
+import 'jquery-highlightRegex';
+import 'jquery-history';
+import 'jquery-jsonp';
+import 'jquery-serializeObject';
+import 'jquery-utils';
 
 // Other plugins
 import autosize from 'autosize';
-// XXX: this weirdness is temporarily needed because the version of
-// diff-match-patch we bundle is not CommonJS-friendly
-require('imports?this=>window!diff-match-patch');
-require('iso8601');
-require('shortcut');
-var Levenshtein = require('levenshtein');
+import cx from 'classnames';
+import Levenshtein from 'levenshtein';
+import assign from 'object-assign';
+import 'shortcut';
 
-var UnitSet = require('../collections').UnitSet;
-
-var captcha = require('../captcha.js');
-var helpers = require('../helpers.js');
-var msg = require('../msg.js');
-var score = require('../score.js');
-var search = require('../search.js');
-var utils = require('../utils.js');
-
+import StatsAPI from 'api/StatsAPI';
+import UnitAPI from 'api/UnitAPI';
+import cookie from 'utils/cookie';
 import linkHashtags from 'utils/linkHashtags';
 
+import captcha from '../captcha';
+import { UnitSet } from '../collections';
+import helpers from '../helpers';
+import msg from '../msg';
+import score from '../score';
+import search from '../search';
+import utils from '../utils';
+import { escapeUnsafeRegexSymbols, makeRegexForMultipleWords } from './utils';
 
-var filterSelectOpts = {
-      dropdownAutoWidth: true,
-      width: 'off'
-    },
-    sortSelectOpts = _.extend({
-      minimumResultsForSearch: -1
-    }, filterSelectOpts);
+
+const CTX_STEP = 1;
+
+
+const filterSelectOpts = {
+  dropdownAutoWidth: true,
+  width: 'off'
+};
+const sortSelectOpts = assign({
+  minimumResultsForSearch: -1
+}, filterSelectOpts);
+
+
+let mtProviders = [];
 
 
 function _refreshChecksSnippet(newChecks) {
-  let $checks = $('.js-unit-checks');
-  let focusedArea = $('.focusthis')[0];
+  const $checks = $('.js-unit-checks');
+  const focusedArea = $('.focusthis')[0];
 
   $checks.html(newChecks).show();
   utils.blinkClass($checks, 'blink', 4, 200);
@@ -72,12 +78,28 @@ PTL.editor = {
       mt: []
     };
 
-    options && $.extend(this.settings, options);
+    options && assign(this.settings, options);
+
+    /* Cached elements */
+    this.backToBrowserEl = document.querySelector('.js-back-to-browser');
+    this.$editorActivity = $('#js-editor-act');
+    this.$editorBody = $('.js-editor-body');
+    this.editorTableEl = document.querySelector('.js-editor-table');
+    this.$filterStatus = $('#js-filter-status');
+    this.$filterChecks = $('#js-filter-checks');
+    this.$filterChecksWrapper = $('.js-filter-checks-wrapper');
+    this.$filterSortBy = $('#js-filter-sort');
+    this.$msgOverlay = $('#js-editor-msg-overlay');
+    this.$navNext = $('#js-nav-next');
+    this.$navPrev = $('#js-nav-prev');
+    this.unitCountEl = document.querySelector('.js-unit-count');
+    this.unitIndexEl = document.querySelector('.js-unit-index');
 
     /* Initialize variables */
     this.units = new UnitSet([], {
       chunkSize: this.settings.chunkSize
     });
+    this.editorRow = null;
 
     this.filter = 'all';
     this.checks = [];
@@ -85,8 +107,7 @@ PTL.editor = {
     this.modifiedSince = null;
     this.user = null;
     this.ctxGap = 0;
-    this.ctxQty = parseInt($.cookie('ctxQty'), 10) || 1;
-    this.ctxStep= 1;
+    this.ctxQty = parseInt(cookie('ctxQty'), 10) || 1;
     this.preventNavigation = false;
 
     this.isUnitDirty = false;
@@ -97,14 +118,9 @@ PTL.editor = {
     /* Regular expressions */
     this.cpRE = /^(<[^>]+>|\[n\|t]|\W$^\n)*(\b|$)/gm;
 
-    /* Timeline requests handler */
-    this.timelineReq = null;
-
     /* TM requests handler */
     this.tmReq = null;
 
-    /* Differencer */
-    this.differencer = new diff_match_patch();
     /* Levenshtein word comparer */
     this.wordComparer = new Levenshtein({compare: 'words'});
 
@@ -122,8 +138,8 @@ PTL.editor = {
     });
 
     /* Select2 */
-    $('#js-filter-status').select2(filterSelectOpts);
-    $('#js-filter-sort').select2(sortSelectOpts);
+    this.$filterStatus.select2(filterSelectOpts);
+    this.$filterSortBy.select2(sortSelectOpts);
 
     /* Screenshot images */
     $(document).on('click', '.js-dev-img', function (e) {
@@ -179,7 +195,7 @@ PTL.editor = {
     $(document).on('click', '.js-copyoriginal', (e) => {
       const uId = e.currentTarget.dataset.uid;
       const sources = [
-        ...document.querySelectorAll(`#js-unit-${uId} .translation-text`)
+        ...document.querySelectorAll(`#js-unit-${uId} .js-translation-text`)
       ].map((el) => el.textContent);
       this.copyOriginal(sources);
     });
@@ -187,26 +203,38 @@ PTL.editor = {
     /* Editor navigation/submission */
     $(document).on('mouseup', 'tr.view-row, tr.ctx-row', this.gotoUnit);
     $(document).on('keypress', '.js-unit-index', (e) => this.gotoIndex(e));
-    $(document).on('dblclick click', '.js-unit-index', this.unitIndex);
-    $(document).on('click', 'input.submit', this.submit);
-    $(document).on('click', 'input.suggest', this.suggest);
+    $(document).on('dblclick click', '.js-unit-index', (e) => this.unitIndex(e));
+    $(document).on('click', 'input.submit', (e) => {
+      e.preventDefault();
+      this.handleSubmit();
+    });
+    $(document).on('click', 'input.suggest', (e) => {
+      e.preventDefault();
+      this.handleSuggest();
+    });
     $(document).on('click', '#js-nav-prev', () => this.gotoPrev());
     $(document).on('click', '#js-nav-next', () => this.gotoNext());
-    $(document).on('click', '.js-suggestion-reject', this.rejectSuggestion);
-    $(document).on('click', '.js-suggestion-accept', this.acceptSuggestion);
-    $(document).on('click', '#js-toggle-timeline', this.toggleTimeline);
-    $(document).on('click', '.js-toggle-check', this.toggleCheck);
+    $(document).on('click', '.js-suggestion-reject', (e) => {
+      e.stopPropagation();
+      this.rejectSuggestion(e.currentTarget.dataset.suggId);
+    });
+    $(document).on('click', '.js-suggestion-accept', (e) => {
+      e.stopPropagation();
+      this.acceptSuggestion(e.currentTarget.dataset.suggId);
+    });
+    $(document).on('click', '#js-toggle-timeline', (e) => this.toggleTimeline(e));
+    $(document).on('click', '.js-toggle-check', (e) => {
+      this.toggleCheck(e.currentTarget.dataset.checkId);
+    });
 
     /* Filtering */
-    $(document).on('change', '#js-filter-status', this.filterStatus);
-    $(document).on('change', '#js-filter-checks', this.filterChecks);
+    $(document).on('change', '#js-filter-status', () => this.filterStatus());
+    $(document).on('change', '#js-filter-checks', () => this.filterChecks());
     $(document).on('change', '#js-filter-sort', () => this.filterSort());
-    $(document).on('click', '.js-more-ctx', function () {
-      PTL.editor.moreContext(false);
-    });
-    $(document).on('click', '.js-less-ctx', this.lessContext);
-    $(document).on('click', '.js-show-ctx', this.showContext);
-    $(document).on('click', '.js-hide-ctx', this.hideContext);
+    $(document).on('click', '.js-more-ctx', () => this.moreContext());
+    $(document).on('click', '.js-less-ctx', () => this.lessContext());
+    $(document).on('click', '.js-show-ctx', () => this.showContext());
+    $(document).on('click', '.js-hide-ctx', () => this.hideContext());
 
     /* Commenting */
     $(document).on('click', '.js-editor-comment', function (e) {
@@ -221,11 +249,11 @@ PTL.editor = {
         $elem.css('display', 'none');
       }
     });
-    $(document).on('submit', '#js-comment-form', this.comment);
-    $(document).on('click', '.js-comment-remove', this.removeComment);
+    $(document).on('submit', '#js-comment-form', (e) => this.addComment(e));
+    $(document).on('click', '.js-comment-remove', (e) => this.removeComment(e));
 
     /* Misc */
-    $(document).on('click', '.js-editor-msg-hide', this.hideMsg);
+    $(document).on('click', '.js-editor-msg-hide', () => this.hideMsg());
 
     $(document).on('click', '.js-toggle-raw', function (e) {
       e.preventDefault();
@@ -234,7 +262,7 @@ PTL.editor = {
       autosize.update(document.querySelector('.js-translation-area'));
     });
 
-    /* */
+    /* Confirmation prompt */
     window.addEventListener('beforeunload', (e) => {
       if (PTL.editor.isUnitDirty) {
         e.returnValue = gettext(
@@ -244,11 +272,11 @@ PTL.editor = {
     });
 
     /* Bind hotkeys */
-    shortcut.add('ctrl+return', function () {
-      if (PTL.editor.isSuggestMode()) {
-        $('input.suggest').trigger('click');
+    shortcut.add('ctrl+return', () => {
+      if (this.isSuggestMode()) {
+        this.handleSuggest();
       } else {
-        $('input.submit').trigger('click');
+        this.handleSubmit();
       }
     });
     shortcut.add('ctrl+space', () => this.toggleState());
@@ -262,47 +290,41 @@ PTL.editor = {
 
     if (navigator.platform.toUpperCase().indexOf('MAC') >= 0) {
       // Optimize string join with '<br/>' as separator
-      $('#js-nav-next')
+      this.$navNext
         .attr('title',
               gettext('Go to the next string (Ctrl+.)<br/><br/>Also:<br/>Next page: Ctrl+Shift+.<br/>Last page: Ctrl+Shift+End')
       );
-      $('#js-nav-prev')
+      this.$navPrev
         .attr('title',
               gettext('Go to the previous string (Ctrl+,)<br/><br/>Also:</br>Previous page: Ctrl+Shift+,<br/>First page: Ctrl+Shift+Home')
       );
     }
 
-    shortcut.add('ctrl+shift+n', this.unitIndex);
+    shortcut.add('ctrl+shift+n', (e) => this.unitIndex(e));
 
     /* XHR activity indicator */
-    $(document).ajaxStart(function () {
-      clearTimeout(PTL.editor.delayedActivityTimer);
-      PTL.editor.delayedActivityTimer = setTimeout(function () {
-        PTL.editor.showActivity();
+    $(document).ajaxStart(() => {
+      clearTimeout(this.delayedActivityTimer);
+      this.delayedActivityTimer = setTimeout(() => {
+        this.showActivity();
       }, 3000);
     });
-    $(document).ajaxStop(function () {
-      clearTimeout(PTL.editor.delayedActivityTimer);
-      if (!PTL.editor.isLoading) {
-        PTL.editor.hideActivity();
+    $(document).ajaxStop(() => {
+      clearTimeout(this.delayedActivityTimer);
+      if (!this.isLoading) {
+        this.hideActivity();
       }
     });
 
-    /* Load MT backends */
-    $.each(this.settings.mt, function () {
-      var backend = this.name, key = this.key;
-
-      $.ajax({
-        url: s(['js/mt/', backend, '.js'].join('')),
-        async: false,
-        dataType: 'script',
-        success: function () {
-          setTimeout(function () {
-            PTL.editor.mt[backend].init(key);
-          }, 0);
-          $(document).on('mt_ready', 'table.translate-table',
-                         PTL.editor.mt[backend].ready);
-        }
+    /* Load MT providers */
+    this.settings.mt.forEach((provider) => {
+      require.ensure([], () => {
+        // Retrieve actual module name: FOO_BAR_BAZ => FooBarBaz
+        const moduleName = provider.name.split('_').map(
+          (x) => x[0] + x.slice(1).toLowerCase()
+        ).join('');
+        const Module = require('./mt/providers/' + moduleName).default;
+        mtProviders.push(new Module(provider.key));
       });
     });
 
@@ -310,163 +332,155 @@ PTL.editor = {
     setInterval(helpers.updateRelativeDates, 6e4);
 
     /* History support */
-    setTimeout(function () {
-      $.history.init(function (hash) {
-        var params = utils.getParsedHash(hash),
-            isInitial = true,
-            uId = 0;
+    $.history.init((hash) => {
+      var params = utils.getParsedHash(hash),
+          isInitial = true,
+          uId = 0;
 
-        // Walk through known filtering criterias and apply them to the editor object
+      // Walk through known filtering criterias and apply them to the editor object
 
-        if (params.unit) {
-          var uIdParam = parseInt(params.unit, 10);
+      if (params.unit) {
+        var uIdParam = parseInt(params.unit, 10);
 
-          if (uIdParam && !isNaN(uIdParam)) {
-            var current = PTL.editor.units.getCurrent(),
-                newUnit = PTL.editor.units.get(uIdParam);
-            if (newUnit && newUnit !== current) {
-              PTL.editor.units.setCurrent(newUnit);
-              PTL.editor.displayEditUnit();
-              return;
-            } else {
-              uId = uIdParam;
-              // Don't retrieve initial data if there are existing results
-              isInitial = !PTL.editor.units.length;
-            }
+        if (uIdParam && !isNaN(uIdParam)) {
+          var current = this.units.getCurrent(),
+              newUnit = this.units.get(uIdParam);
+          if (newUnit && newUnit !== current) {
+            this.setUnit(newUnit);
+            return;
+          } else {
+            uId = uIdParam;
+            // Don't retrieve initial data if there are existing results
+            isInitial = !this.units.length;
           }
         }
+      }
 
-        // Reset to defaults
-        PTL.editor.filter = 'all';
-        PTL.editor.checks = [];
-        PTL.editor.category = [];
-        PTL.editor.sortBy = 'default';
+      // Reset to defaults
+      this.filter = 'all';
+      this.checks = [];
+      this.category = [];
+      this.sortBy = 'default';
 
-        if ('filter' in params) {
-          var filterName = params.filter;
+      if ('filter' in params) {
+        var filterName = params.filter;
 
-          // Set current state
-          PTL.editor.filter = filterName;
+        // Set current state
+        this.filter = filterName;
 
-          if (filterName === 'checks' && 'checks' in params) {
-            PTL.editor.checks = params.checks.split(',');
-          }
-          if (filterName === 'checks' && 'category' in params) {
-            PTL.editor.category = params.category;
-          }
-          if ('sort' in params) {
-            PTL.editor.sortBy = params.sort;
-          }
+        if (filterName === 'checks' && 'checks' in params) {
+          this.checks = params.checks.split(',');
+        }
+        if (filterName === 'checks' && 'category' in params) {
+          this.category = params.category;
+        }
+        if ('sort' in params) {
+          this.sortBy = params.sort;
+        }
+      }
+
+      if ('modified-since' in params) {
+        this.modifiedSince = params['modified-since'];
+      } else {
+        this.modifiedSince = null;
+      }
+
+      if ('month' in params) {
+        this.month = params.month;
+      } else {
+        this.month = null;
+      }
+
+      // Only accept the user parameter for 'user-*' filters
+      if ('user' in params && this.filter.indexOf('user-') === 0) {
+        var user;
+        this.user = user = encodeURIComponent(params.user);
+
+        var newOpts = [],
+            values = {
+          'user-suggestions':
+            // Translators: '%s' is a username
+            interpolate(gettext("%s's pending suggestions"), [user]),
+          'user-suggestions-accepted':
+            // Translators: '%s' is a username
+            interpolate(gettext("%s's accepted suggestions"), [user]),
+          'user-suggestions-rejected':
+            // Translators: '%s' is a username
+            interpolate(gettext("%s's rejected suggestions"), [user]),
+          'user-submissions':
+            // Translators: '%s' is a username
+            interpolate(gettext("%s's submissions"), [user]),
+          'user-submissions-overwritten':
+            // Translators: '%s' is a username, meaning "submissions by %s,
+            // that were overwritten"
+            interpolate(gettext("%s's overwritten submissions"), [user]),
+        };
+        for (var key in values) {
+          newOpts.push(
+            `<option value="${key}" data-user="${user}" class="js-user-filter">` +
+              values[key] +
+            '</option>'
+          );
+        }
+        $(".js-user-filter").remove();
+        this.$filterStatus.append(newOpts.join(''));
+      }
+
+      if ('search' in params) {
+        // Note that currently the search, if provided along with the other
+        // filters, would override them
+        this.filter = 'search';
+
+        let newState = {
+          searchText: params.search,
+        };
+
+        if ('sfields' in params) {
+          newState.searchFields = params.sfields.split(',');
+        }
+        if ('soptions' in params) {
+          newState.searchOptions = params.soptions.split(',');
         }
 
-        if ('modified-since' in params) {
-          PTL.editor.modifiedSince = params['modified-since'];
-        } else {
-          PTL.editor.modifiedSince = null;
+        search.setState(newState);
+      }
+
+      // Update the filter UI to match the current filter
+
+      // disable navigation on UI toolbar events to prevent data reload
+      this.preventNavigation = true;
+
+      var filterValue = this.filter === 'search' ? 'all' : this.filter;
+      this.$filterStatus.select2('val', filterValue);
+
+      if (this.filter === 'checks') {
+        // if the checks selector is empty (i.e. the 'change' event was not fired
+        // because the selection did not change), force the update to populate the selector
+        if (this.$filterChecks.is(':hidden')) {
+          this.getCheckOptions();
         }
+      }
 
-        if ('month' in params) {
-          PTL.editor.month = params.month;
-        } else {
-          PTL.editor.month = null;
+      this.$filterSortBy.select2('val', this.sortBy);
+
+      if (this.filter === 'search') {
+        this.$filterChecksWrapper.hide();
+      }
+
+      // re-enable normal event handling
+      this.preventNavigation = false;
+
+      this.fetchUnits({
+        initial: isInitial,
+        uId: uId,
+      }).then((hasResults) => {
+        if (!hasResults) {
+          return;
         }
+        this.setUnit(uId);
+      });
 
-        // Only accept the user parameter for 'user-*' filters
-        if ('user' in params && PTL.editor.filter.indexOf('user-') === 0) {
-          var user;
-          PTL.editor.user = user = encodeURIComponent(params.user);
-
-          var newOpts = [],
-              values = {
-            'user-suggestions':
-              // Translators: '%s' is a username
-              interpolate(gettext("%s's pending suggestions"), [user]),
-            'user-suggestions-accepted':
-              // Translators: '%s' is a username
-              interpolate(gettext("%s's accepted suggestions"), [user]),
-            'user-suggestions-rejected':
-              // Translators: '%s' is a username
-              interpolate(gettext("%s's rejected suggestions"), [user]),
-            'user-submissions':
-              // Translators: '%s' is a username
-              interpolate(gettext("%s's submissions"), [user]),
-            'user-submissions-overwritten':
-              // Translators: '%s' is a username, meaning "submissions by %s,
-              // that were overwritten"
-              interpolate(gettext("%s's overwritten submissions"), [user]),
-          };
-          for (var key in values) {
-            newOpts.push([
-              '<option value="', key, '" data-user="', user, '" class="',
-              'js-user-filter' ,'">', values[key], '</option>'
-            ].join(''));
-          }
-          $(".js-user-filter").remove();
-          $('#js-filter-status').append(newOpts.join(''));
-        }
-
-        if ('search' in params) {
-          // Note that currently the search, if provided along with the other
-          // filters, would override them
-          PTL.editor.filter = "search";
-
-          let newState = {
-            searchText: params.search,
-          };
-
-          if ('sfields' in params) {
-            newState.searchFields = params.sfields.split(',');
-          }
-          if ('soptions' in params) {
-            newState.searchOptions = params.soptions.split(',');
-          }
-
-          search.setState(newState);
-        }
-
-        // Update the filter UI to match the current filter
-
-        // disable navigation on UI toolbar events to prevent data reload
-        PTL.editor.preventNavigation = true;
-
-        var filterValue = PTL.editor.filter === 'search' ? 'all' :
-                                                            PTL.editor.filter;
-        $('#js-filter-status').select2('val', filterValue);
-
-        if (PTL.editor.filter === "checks") {
-          // if the checks selector is empty (i.e. the 'change' event was not fired
-          // because the selection did not change), force the update to populate the selector
-          if ($('#js-filter-checks').is(':hidden')) {
-            PTL.editor.getCheckOptions({
-              success: PTL.editor.appendChecks
-            });
-          }
-        }
-
-        $('#js-filter-sort').select2('val', PTL.editor.sortBy);
-
-        if (PTL.editor.filter === 'search') {
-          $('.js-filter-checks-wrapper').hide();
-        }
-
-        // re-enable normal event handling
-        PTL.editor.preventNavigation = false;
-
-        PTL.editor.fetchUnits({
-          initial: isInitial,
-          uId: uId,
-          success: function () {
-            if (uId > 0) {
-              PTL.editor.units.setCurrent(uId);
-            } else {
-              PTL.editor.units.setFirstAsCurrent();
-            }
-            PTL.editor.displayEditUnit();
-          }
-        });
-
-      }, {'unescape': true});
-    }, 1); // not sure why we had a 1000ms timeout here
+    }, {'unescape': true});
 
   },
 
@@ -490,26 +504,23 @@ PTL.editor = {
       firstArea.focus();
     }
 
-    this.settings.targetLang = PTL.editor.normalizeCode(
-      $('.js-translation-area').attr('lang')
-    );
-
     const $devComments = $('.js-developer-comments');
     $devComments.html(linkHashtags($devComments.html()));
 
-    this.hlSearch();
+    if (this.filter === 'search') {
+      this.hlSearch();
+    }
 
     if (this.settings.tmUrl !== '') {
       this.getTMUnits();
     }
 
     if (this.tmData !== null) {
-      var tmContent = this.getTMUnitsContent(PTL.editor.tmData);
+      var tmContent = this.getTMUnitsContent(this.tmData);
       $('#extras-container').append(tmContent);
     }
 
-    // All is ready, let's call the ready functions of the MT backends
-    $("table.translate-table").trigger("mt_ready");
+    this.runHooks();
 
     this.isUnitDirty = false;
     this.keepState = false;
@@ -517,17 +528,12 @@ PTL.editor = {
     this.hideActivity();
     this.updateExportLink();
     helpers.updateRelativeDates();
-
-    // clear any pending 'Loading...' indicator timer
-    // as ajaxStop() is not fired in IE properly
-    // at initial page load (?!)
-    clearTimeout(this.delayedActivityTimer);
   },
 
   /* Things to do when no results are returned */
   noResults: function () {
-    PTL.editor.displayMsg({body: gettext("No results.")});
-    PTL.editor.reDraw();
+    this.displayMsg({body: gettext("No results.")});
+    this.reDraw();
   },
 
   canNavigate: function() {
@@ -547,59 +553,27 @@ PTL.editor = {
    * Text utils
    */
 
-  /* Escape unsafe regular expression symbols:
-   * ! $ & ( ) * + - . : < = > ? [ \ ] ^ { | }
-   *
-   * Special characters can be written as
-   * Regular Expression class:
-   * [!$&(-+\-.:<-?\[-^{-}]
-   */
-  escapeUnsafeRegexSymbols: function (s) {
-    // Replace doesn't modify original variable and it recreates a
-    // new string with special characters escaped.
-    return s.replace(/[!$&(-+\-.:<-?\[-^{-}]/g, '\\$&');
-  },
-
-  /* Make regular expression using every word
-   * in input string
-   */
-  makeRegexForMultipleWords: function (s) {
-    // This function has these steps:
-    // 1) escape unsafe regular expression symbols;
-    // 2) trim ' ' (whitespaces) to avoid multiple
-    //    '|' at the beginning and at the end;
-    // 3) replace ' ' (one or more whitespaces) with '|'. In this
-    //    way every word can be searched by regular expression;
-    // 4) add brackets.
-    return ['(', PTL.editor.escapeUnsafeRegexSymbols(s).trim().replace(/ +/g,
-      '|'), ')'].join('');
-  },
-
   /* Highlights search results */
   hlSearch: function () {
-    let {searchText, searchFields, searchOptions} = search.state;
-    let hl = PTL.editor.filter === 'search' ? searchText : '',
-        sel = [],
-        selMap = {
-          notes: 'div.developer-comments',
-          locations: 'div.translate-locations',
-          source: 'td.translate-original, div.original div.translation-text',
-          target: 'td.translate-translation'
-        },
-        hlRegex;
+    const { searchText, searchFields, searchOptions } = search.state;
+    const selMap = {
+      notes: 'div.developer-comments',
+      locations: 'div.translate-locations',
+      source: 'td.translate-original, .original .js-translation-text',
+      target: 'td.translate-translation'
+    };
 
     // Build highlighting selector based on chosen search fields
-    $.each(searchFields, function (i, field) {
-      sel.push("tr.edit-row " + selMap[field]);
-      sel.push("tr.view-row " + selMap[field]);
-    });
+    const sel = searchFields.map((fieldName) => [
+      `tr.edit-row ${selMap[fieldName]}`,
+      `tr.view-row ${selMap[fieldName]}`
+    ]).reduce((a, b) => a.concat(b), []);
 
+    let hlRegex;
     if (searchOptions.indexOf('exact') >= 0 ) {
-      hlRegex = new RegExp([
-          '(', PTL.editor.escapeUnsafeRegexSymbols(hl), ')'
-        ].join(''));
+      hlRegex = new RegExp(`(${escapeUnsafeRegexSymbols(searchText)})`);
     } else {
-      hlRegex = new RegExp(PTL.editor.makeRegexForMultipleWords(hl), "i");
+      hlRegex = new RegExp(makeRegexForMultipleWords(searchText), 'i');
     }
     $(sel.join(", ")).highlightRegex(hlRegex);
   },
@@ -643,12 +617,12 @@ PTL.editor = {
       active.focus();
       autosize.update(active);
       // Make this fuzzy
-      PTL.editor.goFuzzy();
+      this.goFuzzy();
       // Place cursor at start of target text
-      PTL.editor.cpRE.exec($(active).val());
-      i = PTL.editor.cpRE.lastIndex;
+      this.cpRE.exec($(active).val());
+      let i = this.cpRE.lastIndex;
       $(active).caret(i, i);
-      PTL.editor.cpRE.lastIndex = 0;
+      this.cpRE.lastIndex = 0;
     }
   },
 
@@ -664,30 +638,6 @@ PTL.editor = {
 
     commentInput.focus();
     commentInput.value = text;
-  },
-
-
-  /* Does the actual diffing */
-  doDiff: function (a, b) {
-    var html = [],
-        diff = this.differencer.diff_main(a, b),
-        op, text, i;
-
-    this.differencer.diff_cleanupSemantic(diff);
-
-    for (i=0; i<diff.length; i++) {
-      op = diff[i][0];
-      text = utils.fancyEscape(diff[i][1]);
-      if (op === DIFF_INSERT) {
-        html[i] = ['<span class="diff-insert">', text, '</span>'].join('');
-      } else if (op === DIFF_DELETE) {
-        html[i] = ['<span class="diff-delete">', text, '</span>'].join('');
-      } else if (op === DIFF_EQUAL) {
-        html[i] = text;
-      }
-    }
-
-    return html.join('');
   },
 
 
@@ -713,7 +663,7 @@ PTL.editor = {
     $checkbox.prop('checked', true);
 
     if (!this.settings.isAdmin) {
-      if (!PTL.editor.isSuggestMode()) {
+      if (!this.isSuggestMode()) {
         $('.js-fuzzy-block').show();
       }
       $checkbox[0].defaultChecked = true;
@@ -899,7 +849,7 @@ PTL.editor = {
   checkSimilarTranslations: function () {
     var dataSelector = 'translation-aid',
         dataSelectorMT = 'translation-aid-mt',
-        $aidElementsMT = $(['[data-', dataSelectorMT, ']'].join(''));
+        $aidElementsMT = $(`[data-${dataSelectorMT}]`);
 
     let aidElementsSelector = `[data-${dataSelector}]`;
 
@@ -943,8 +893,8 @@ PTL.editor = {
     var bestMatchCls = 'best-match',
         exactMatchCls = 'exact-match';
 
-    $('.translate-table').find(['.', bestMatchCls].join(''))
-                         .removeClass([bestMatchCls, exactMatchCls].join(' '));
+    $('.translate-table').find(`.${bestMatchCls}`)
+                         .removeClass(`${bestMatchCls} ${exactMatchCls}`);
 
     if (boxId === null) {
       return false;
@@ -962,19 +912,19 @@ PTL.editor = {
 
   /* Changes the editor into suggest mode */
   doSuggestMode: function () {
-    $("table.translate-table").addClass("suggest-mode");
+    this.editorTableEl.classList.add('suggest-mode');
   },
 
 
   /* Changes the editor into submit mode */
   undoSuggestMode: function () {
-    $("table.translate-table").removeClass("suggest-mode");
+    this.editorTableEl.classList.remove('suggest-mode');
   },
 
 
   /* Returns true if the editor is in suggest mode */
   isSuggestMode: function () {
-    return $("table.translate-table").hasClass("suggest-mode");
+    return this.editorTableEl.classList.contains('suggest-mode');
   },
 
 
@@ -992,7 +942,7 @@ PTL.editor = {
     var $exportOpt = $('.js-export-view'),
         baseUrl = $exportOpt.data('export-url'),
         hash = utils.getHash().replace(/&?unit=\d+/, ''),
-        exportLink = hash ? [baseUrl, hash].join('?') : baseUrl;
+        exportLink = hash ? `${baseUrl}?${hash}` : baseUrl;
 
     $exportOpt.data('href', exportLink);
   },
@@ -1003,25 +953,24 @@ PTL.editor = {
 
   showActivity: function (force) {
     this.hideMsg();
-    $("#js-editor-act").spin().fadeIn(300);
+    this.$editorActivity.spin().fadeIn(300);
   },
 
   hideActivity: function () {
-    $("#js-editor-act").spin(false).fadeOut(300);
+    this.$editorActivity.spin(false).fadeOut(300);
   },
 
   /* Displays an informative message */
-  displayMsg: function (opts) {
-    _.defaults(opts, {showClose: true});
-
+  displayMsg: function ({ showClose=true, body=null }) {
     this.hideActivity();
     helpers.fixSidebarHeight();
-    $('#js-editor-msg-overlay').html(this.tmpl.msg({opts: opts})).fadeIn(300);
+    this.$msgOverlay.html(
+      this.tmpl.msg({ showClose, body })
+    ).fadeIn(300);
   },
 
   hideMsg: function () {
-    var $wrapper = $('#js-editor-msg-overlay');
-    $wrapper.length && $wrapper.fadeOut(300);
+    this.$msgOverlay.length && this.$msgOverlay.fadeOut(300);
   },
 
   /* Displays error messages on top of the toolbar */
@@ -1065,7 +1014,7 @@ PTL.editor = {
   displayObsoleteMsg: function () {
     var msgText = gettext('This string no longer exists.'),
         backMsg = gettext('Go back to browsing'),
-        backLink = $('.js-back-to-browser').attr('href'),
+        backLink = this.backToBrowserEl.getAttribute('href'),
         reloadMsg = gettext('Reload page'),
         html = [
           '<div>', msgText, '</div>',
@@ -1076,7 +1025,7 @@ PTL.editor = {
           '</div>',
         ].join('');
 
-    PTL.editor.displayMsg({body: html, showClose: false});
+    this.displayMsg({body: html, showClose: false});
   },
 
 
@@ -1123,59 +1072,75 @@ PTL.editor = {
    */
 
 
-  /* Builds a single row */
-  buildRow: function (unit) {
-    return [
-      '<tr id="row', unit.id, '" class="view-row">',
-        this.tmpl.vUnit({unit: unit.toJSON()}),
+  /* Renders a single row */
+  renderRow: function (unit) {
+    return (
+      `<tr id="row${unit.id}" class="view-row">` +
+        this.tmpl.vUnit({unit: unit.toJSON()}) +
       '</tr>'
-    ].join('');
+    );
   },
 
-  /* Builds the editor rows */
-  buildRows: function () {
-    var unitGroups = this.getUnitGroups(),
-        currentUnit = this.units.getCurrent(),
-        rows = [],
-        i, unit;
+  renderEditorRow: function (unit) {
+    const eClass = cx('edit-row', {
+      'fuzzy-unit': unit.get('isfuzzy'),
+      'with-ctx': this.filter !== 'all',
+    });
 
-    _.each(unitGroups, function (unitGroup) {
+    const [ctxRowBefore, ctxRowAfter] = this.renderCtxControls({ hasData: false });
+
+    return (
+      (this.filter !== 'all' ? ctxRowBefore : '') +
+      `<tr id="row${unit.id}" class="${eClass}">` +
+        this.editorRow +
+      '</tr>' +
+      (this.filter !== 'all' ? ctxRowAfter : '')
+    );
+  },
+
+  /* Renders the editor rows */
+  renderRows: function () {
+    const unitGroups = this.getUnitGroups();
+    const currentUnit = this.units.getCurrent();
+
+    let rows = [];
+
+    unitGroups.forEach((unitGroup) => {
       // Don't display a delimiter row if all units have the same origin
       if (unitGroups.length !== 1) {
-        rows.push([
-          '<tr class="delimiter-row"><td colspan="2">',
-            '<div class="hd"><h2>', unitGroup.path, '</h2></div>',
+        rows.push(
+          '<tr class="delimiter-row"><td colspan="2">' +
+            `<div class="hd"><h2>${_.escape(unitGroup.path)}</h2></div>` +
           '</td></tr>'
-        ].join(''));
+        );
       }
 
-      for (i=0; i<unitGroup.units.length; i++) {
-        unit = unitGroup.units[i];
+      for (let i=0; i<unitGroup.units.length; i++) {
+        let unit = unitGroup.units[i];
 
         if (unit.id === currentUnit.id) {
-          rows.push(this.getEditUnit());
+          rows.push(this.renderEditorRow(unit));
         } else {
-          rows.push(this.buildRow(unit));
+          rows.push(this.renderRow(unit));
         }
       }
-    }, this);
+    });
 
     return rows.join('');
   },
 
 
-  /* Builds context rows for units passed as 'units' */
-  buildCtxRows: function (units, extraCls) {
-    var i, unit,
-        currentUnit = this.units.getCurrent(),
-        rows = '';
+  /* Renders context rows for units passed as 'units' */
+  renderCtxRows: function (units, extraCls) {
+    const currentUnit = this.units.getCurrent();
+    let rows = '';
 
-    for (i=0; i<units.length; i++) {
+    for (let i=0; i<units.length; i++) {
       // FIXME: Please let's use proper models for context units
-      unit = units[i];
-      unit = $.extend({}, currentUnit.toJSON(), unit);
+      let unit = units[i];
+      unit = assign({}, currentUnit.toJSON(), unit);
 
-      rows += '<tr id="ctx' + unit.id + '" class="ctx-row ' + extraCls + '">';
+      rows += `<tr id="ctx${unit.id}" class="ctx-row ${extraCls}">`;
       rows += this.tmpl.vUnit({unit: unit});
       rows += '</tr>';
     }
@@ -1207,7 +1172,7 @@ PTL.editor = {
       end = unitCount;
     }
 
-    return _.reduce(this.units.slice(begin, end), function (out, unit) {
+    return this.units.slice(begin, end).reduce((out, unit) => {
       pootlePath = unit.get('store').get('pootlePath');
 
       if (pootlePath === prevPath) {
@@ -1227,96 +1192,84 @@ PTL.editor = {
 
 
   /* Sets the edit view for the current active unit */
-  displayEditUnit: function () {
-    if (PTL.editor.units.length) {
-      this.fetchUnits();
-
-      // Hide any visible message
+  renderUnit: function () {
+    if (this.units.length) {
       this.hideMsg();
 
-      this.reDraw(this.buildRows());
-
-      this.updateNavButtons();
+      this.reDraw(this.renderRows());
     }
   },
 
 
   /* reDraws the translate table rows */
   reDraw: function (newTbody) {
-    const $where = $('.js-editor-body');
-    const $oldRows = $where.find('tr');
+    const $oldRows = this.$editorBody.find('tr');
 
     $oldRows.remove();
 
     if (newTbody !== undefined) {
-      $where.append(newTbody);
+      this.$editorBody.append(newTbody);
 
-      // Call the post-render handlers
       this.ready();
     }
   },
 
 
   /* Updates a button in `selector` to the `disable` state */
-  updateNavButton: function (selector, disable) {
-    var $el = $(selector);
-
+  updateNavButton: function ($button, disable) {
     // Avoid unnecessary actions
-    if ($el.is(':disabled') && disable || $el.is(':enabled') && !disable) {
+    if ($button.is(':disabled') && disable || $button.is(':enabled') && !disable) {
       return;
     }
 
     if (disable) {
-      $el.data('title', $el.attr('title'));
-      $el.removeAttr('title');
+      $button.data('title', $button.attr('title'));
+      $button.removeAttr('title');
     } else {
-      $el.attr('title', $el.data('title'));
+      $button.attr('title', $button.data('title'));
     }
-    $el.prop('disabled', disable);
+    $button.prop('disabled', disable);
   },
 
 
-  /* Updates previous/next navigation button states */
-  updateNavButtons: function () {
-    this.updateNavButton('#js-nav-prev', !this.units.hasPrev());
-    this.updateNavButton('#js-nav-next', !this.units.hasNext());
+  /* Updates the navigation widget */
+  updateNavigation: function () {
+    this.updateNavButton(this.$navPrev, !this.units.hasPrev());
+    this.updateNavButton(this.$navNext, !this.units.hasNext());
+
+    this.unitCountEl.textContent = this.units.total;
+
+    var currentUnit = this.units.getCurrent();
+    if (currentUnit !== undefined) {
+      this.unitIndexEl.textContent = this.units.uIds.indexOf(currentUnit.id) + 1;
+    }
   },
 
+  /* Fetches more units in case they are needed */
+  fetchUnits: function ({ initial=false, uId=0 } = {}) {
+    let reqData = {
+      path: this.settings.pootlePath,
+    };
 
-  /* Fetches more units in case they're needed */
-  fetchUnits: function (opts) {
-    // TODO: move logic into UnitSet
-    var defaults = {
-          initial: false,
-          uId: 0
-        },
-        viewUrl = l('/xhr/units/'),
-        reqData = {
-          path: this.settings.pootlePath
-        };
+    if (initial) {
+      reqData.initial = initial;
 
-    opts = $.extend({}, defaults, opts);
-
-    if (opts.initial) {
-      reqData.initial = opts.initial;
-
-      if (opts.uId > 0) {
-        reqData.uids = opts.uId;
+      if (uId > 0) {
+        reqData.uids = uId;
       }
     } else {
       // Only fetch units limited to an offset, and omit units that have
       // already been fetched
-      var fetchedIds = this.units.fetchedIds(),
-          offset = this.units.chunkSize,
-          curUId = opts.uId > 0 ? opts.uId : this.units.getCurrent().id,
-          uIndex = this.units.uIds.indexOf(curUId),
-          uIds, begin, end;
+      const fetchedIds = this.units.fetchedIds();
+      const offset = this.units.chunkSize;
+      const curUId = uId > 0 ? uId : this.units.getCurrent().id;
+      const uIndex = this.units.uIds.indexOf(curUId);
 
-      begin = Math.max(uIndex - offset, 0);
-      end = Math.min(uIndex + offset + 1, this.units.total);
+      let begin = Math.max(uIndex - offset, 0);
+      let end = Math.min(uIndex + offset + 1, this.units.total);
 
       // Ensure we retrieve chunks of the right size
-      if (opts.uId === 0) {
+      if (uId === 0) {
         if (fetchedIds.indexOf(this.units.uIds[begin]) === -1) {
           begin = Math.max(begin - offset, 0);
         }
@@ -1325,7 +1278,7 @@ PTL.editor = {
         }
       }
 
-      uIds = this.units.uIds.slice(begin, end);
+      let uIds = this.units.uIds.slice(begin, end);
       uIds = _.difference(uIds, fetchedIds);
 
       if (!uIds.length) {
@@ -1335,170 +1288,122 @@ PTL.editor = {
       reqData.uids = uIds.join(',');
     }
 
-    $.extend(reqData, this.getReqData());
+    assign(reqData, this.getReqData());
 
-    $.ajax({
-      url: viewUrl,
-      data: reqData,
-      dataType: 'json',
-      cache: false,
-      success: function (data) {
-        if (data.uIds) {
-          // Clear old data and add new results
-          PTL.editor.units.reset();
-
-          PTL.editor.units.uIds = data.uIds;
-          PTL.editor.units.total = data.uIds.length;
-        }
-
-        // Store view units in the client
-        if (data.unitGroups.length) {
-          var i, unitGroup;
-          for (i=0; i<data.unitGroups.length; i++) {
-            unitGroup = data.unitGroups[i];
-            $.each(unitGroup, function (pootlePath, group) {
-              var storeData = $.extend({pootlePath: pootlePath}, group.meta),
-                  units = _.map(group.units, function (unit) {
-                    return $.extend(unit, {store: storeData});
-                  });
-              PTL.editor.units.set(units, {remove: false});
-            });
-          }
-
-          if (opts.success && $.isFunction(opts.success)) {
-            opts.success();
-          }
-        } else {
-          PTL.editor.noResults();
-        }
-      },
-      error: PTL.editor.error
-    });
+    return UnitAPI.fetchUnits(reqData)
+      .then(
+        (data) => this.storeUnitData(data),
+        this.error
+      );
   },
 
-  /* Updates the navigation controls */
-  updateNav: function () {
-    $("#items-count").text(this.units.total);
+  storeUnitData: function (data) {
+    if (data.uIds) {
+      // Clear old data and add new results
+      this.units.reset();
 
-    var currentUnit = PTL.editor.units.getCurrent();
-    if (currentUnit !== undefined) {
-      var uIndex = this.units.uIds.indexOf(currentUnit.id) + 1;
-      $('.js-unit-index').text(uIndex);
+      this.units.uIds = data.uIds;
+      this.units.total = data.uIds.length;
     }
 
+    const { unitGroups } = data;
+    if (!unitGroups.length) {
+      this.noResults();
+      return false;
+    }
+
+    for (let i=0; i<unitGroups.length; i++) {
+      const unitGroup = unitGroups[i];
+      for (let pootlePath in unitGroup) {
+        const group = unitGroup[pootlePath];
+        const store = assign({ pootlePath: pootlePath }, group.meta);
+        const units = group.units.map((unit) => assign(unit, { store }));
+        this.units.set(units, { remove: false });
+      }
+    }
+
+    return true;
   },
 
-  /* Loads the edit unit for the current active unit */
-  getEditUnit: function () {
-    var editUnit, editCtxRowBefore, editCtxRowAfter, editCtxWidgets, hasData,
-        eClass = "edit-row",
-        currentUnit = this.units.getCurrent(),
-        uid = currentUnit.id,
-        editUrl = l(['/xhr/units/', uid, '/edit/'].join('')),
-        widget = '',
-        ctx = {before: [], after: []};
+  /* Stores editor data for the current unit */
+  setEditUnit: function (data) {
+    const currentUnit = this.units.getCurrent();
+    currentUnit.set('isObsolete', data.is_obsolete);
+    currentUnit.set('sources', data.sources);
 
-    let reqData = {};
-    this.settings.vFolder && (reqData.vfolder = this.settings.vFolder);
+    this.tmData = data.tm_suggestions || null;
+    this.editorRow = data.editor;
+  },
 
-    $.ajax({
-      url: editUrl,
-      async: false,
-      data: reqData,
-      dataType: 'json',
-      success: function (data) {
-        PTL.editor.tmData = data.tm_suggestions || null;
-        widget = data.editor;
+  /* Sets a new unit as the current one, rendering it as well */
+  setUnit: function (unit) {
+    const newUnit = this.units.setCurrent(unit);
 
-        PTL.editor.updateNav();
+    this.updateNavigation();
 
-        currentUnit.set('isObsolete', data.is_obsolete);
+    this.fetchUnits();
 
-        if (data.ctx) {
-          // Initialize context gap to the maximum context rows available
-          PTL.editor.ctxGap = Math.max(data.ctx.before.length,
-                                       data.ctx.after.length);
-          ctx.before = data.ctx.before;
-          ctx.after = data.ctx.after;
-        }
-      },
-      error: PTL.editor.error
-    });
+    let body = {};
+    this.settings.vFolder && (body.vfolder = this.settings.vFolder);
 
-    eClass += currentUnit.get('isfuzzy') ? " fuzzy-unit" : "";
-    eClass += PTL.editor.filter !== 'all' ? " with-ctx" : "";
-
-    hasData = ctx.before.length || ctx.after.length;
-    editCtxWidgets = this.editCtxUI({hasData: hasData});
-    editCtxRowBefore = editCtxWidgets[0];
-    editCtxRowAfter = editCtxWidgets[1];
-
-    editUnit = (PTL.editor.filter !== 'all' ?
-              editCtxRowBefore + this.buildCtxRows(ctx.before, "before") : '') +
-             '<tr id="row' + uid + '" class="' + eClass + '">' +
-             widget + '</tr>' +
-             (PTL.editor.filter !== 'all' ?
-              this.buildCtxRows(ctx.after, "after") + editCtxRowAfter : '');
-
-    return editUnit;
+    UnitAPI.fetchUnit(newUnit.id, body)
+      .then(
+        (data) => {
+          this.setEditUnit(data);
+          this.renderUnit();
+        },
+        this.error
+      );
   },
 
   /* Pushes translation submissions and moves to the next unit */
-  submit: function (e) {
-    e.preventDefault();
+  handleSubmit: function () {
+    const el = document.querySelector('input.submit');
+    const newTranslation = $('.js-translation-area')[0].value;
+    const suggestions = $('.js-user-suggestion').map(function () {
+      return {
+        text: this.dataset.translationAid,
+        id: this.dataset.suggId,
+      };
+    }).get();
+    const captchaCallbacks = {
+      sfn: 'PTL.editor.processSubmission',
+      efn: 'PTL.editor.error',
+    };
 
-    var el = e.target,
-        uId = PTL.editor.units.getCurrent().id,
-        submitUrl = l(['/xhr/units/', uId].join('')),
-        reqData = $('#translate').serializeObject(),
-        newTranslation = $('.js-translation-area')[0].value,
-        suggestions = $('.js-user-suggestion').map(function () {
-            return {
-              text: $(this).data('translation-aid'),
-              id: this.id
-            };
-          }).get(),
-        captchaCallbacks = {
-          sfn: 'PTL.editor.processSubmission',
-          efn: 'PTL.editor.error'
-        };
+    let body = $('#translate').serializeObject();
 
-    PTL.editor.updateUnitDefaultProperties();
+    this.updateUnitDefaultProperties();
 
     // Check if the string being submitted is already in the set of
     // suggestions
     // FIXME: this is LAME, I wanna die: we need to use proper models!!
-    var suggestionIds = _.pluck(suggestions, 'id'),
-        suggestionTexts = _.pluck(suggestions, 'text'),
-        suggestionIndex = suggestionTexts.indexOf(newTranslation);
+    const suggestionIds = _.pluck(suggestions, 'id');
+    const suggestionTexts = _.pluck(suggestions, 'text');
+    const suggestionIndex = suggestionTexts.indexOf(newTranslation);
 
-    if (suggestionIndex !== -1 && !PTL.editor.isFuzzy()) {
-      $(['#', suggestionIds[suggestionIndex]].join(''))
-        .find('.js-suggestion-accept').trigger('click', [true]);
+    if (suggestionIndex !== -1 && !this.isFuzzy()) {
+      this.acceptSuggestion(suggestionIds[suggestionIndex], { skipToNext: true });
       return;
     }
 
     // If similarities were in the process of being calculated by the time
     // the submit button was clicked, clear the timer and calculate them
     // straight away
-    if (PTL.editor.similarityTimer !== null) {
-      clearTimeout(PTL.editor.similarityTimer);
-      PTL.editor.checkSimilarTranslations();
+    if (this.similarityTimer !== null) {
+      clearTimeout(this.similarityTimer);
+      this.checkSimilarTranslations();
     }
 
-    $.extend(reqData, PTL.editor.getReqData(), PTL.editor.getSimilarityData(),
-             captchaCallbacks);
+    assign(body, this.getReqData(), this.getSimilarityData(), captchaCallbacks);
 
     el.disabled = true;
 
-    $.ajax({
-      url: submitUrl,
-      type: 'POST',
-      data: reqData,
-      dataType: 'json',
-      success: PTL.editor.processSubmission,
-      error: PTL.editor.error
-    });
+    UnitAPI.addTranslation(this.units.getCurrent().id, body)
+      .then(
+        (data) => this.processSubmission(data),
+        this.error
+      );
   },
 
   processSubmission: function (data) {
@@ -1507,9 +1412,9 @@ PTL.editor = {
       return $(el).val();
     }).get();
 
-    var unit = PTL.editor.units.getCurrent();
+    var unit = this.units.getCurrent();
     unit.setTranslation(translations);
-    unit.set('isfuzzy', PTL.editor.isFuzzy());
+    unit.set('isfuzzy', this.isFuzzy());
 
     let hasCriticalChecks = !!data.checks;
     $('.translate-container').toggleClass('error', hasCriticalChecks);
@@ -1521,39 +1426,32 @@ PTL.editor = {
     if (hasCriticalChecks) {
       _refreshChecksSnippet(data.checks);
     } else {
-      PTL.editor.gotoNext();
+      this.gotoNext();
     }
   },
 
   /* Pushes translation suggestions and moves to the next unit */
-  suggest: function (e) {
-    e.preventDefault();
+  handleSuggest: function () {
+    const captchaCallbacks = {
+      sfn: 'PTL.editor.processSuggestion',
+      efn: 'PTL.editor.error'
+    };
 
-    var uId = PTL.editor.units.getCurrent().id,
-        suggestUrl = l(['/xhr/units/', uId, '/suggestions/'].join('')),
-        reqData = $('#translate').serializeObject(),
-        captchaCallbacks = {
-          sfn: 'PTL.editor.processSuggestion',
-          efn: 'PTL.editor.error'
-        };
+    let body = $('#translate').serializeObject();
 
-    PTL.editor.updateUnitDefaultProperties();
+    this.updateUnitDefaultProperties();
 
     // in suggest mode, do not send the fuzzy state flag
     // even if it is set in the form internally
-    delete reqData.state;
+    delete body.state;
 
-    $.extend(reqData, PTL.editor.getReqData(), PTL.editor.getSimilarityData(),
-             captchaCallbacks);
+    assign(body, this.getReqData(), this.getSimilarityData(), captchaCallbacks);
 
-    $.ajax({
-      url: suggestUrl,
-      type: 'POST',
-      data: reqData,
-      dataType: 'json',
-      success: PTL.editor.processSuggestion,
-      error: PTL.editor.error
-    });
+    UnitAPI.addSuggestion(this.units.getCurrent().id, body)
+      .then(
+        (data) => this.processSuggestion(data),
+        this.error
+      );
   },
 
   processSuggestion: function (data) {
@@ -1561,7 +1459,7 @@ PTL.editor = {
       score.set(data.user_score);
     }
 
-    PTL.editor.gotoNext();
+    this.gotoNext();
   },
 
 
@@ -1589,8 +1487,8 @@ PTL.editor = {
       var newHash = utils.updateHashPart('unit', newUnit.id);
       $.history.load(newHash);
     } else if (opts.isSubmission) {
-      var backLink = $('.js-back-to-browser').attr('href');
-      window.location.href = [backLink, 'finished'].join('?');
+      cookie('finished', '1', { path: '/' });
+      window.location.href = this.backToBrowserEl.getAttribute('href');
     }
   },
 
@@ -1627,33 +1525,30 @@ PTL.editor = {
       if (type === 'row') {
         newHash = utils.updateHashPart("unit", uid);
       } else {
-        newHash = ['unit=', encodeURIComponent(uid)].join('');
+        newHash = `unit=${encodeURIComponent(uid)}`;
       }
       $.history.load(newHash);
     }
   },
 
-  /* FIXME: `unitIndex` and `gotoIndex` should part of a view on its own */
-
   /* Selects the element's contents and sets the focus */
   unitIndex: function (e) {
     e.preventDefault();
 
-    var el = $('.js-unit-index')[0],
-        selection = window.getSelection(),
+    var selection = window.getSelection(),
         range = document.createRange();
 
-    range.selectNodeContents(el);
+    range.selectNodeContents(this.unitIndexEl);
     selection.removeAllRanges();
     selection.addRange(range);
-    el.focus();
+    this.unitIndexEl.focus();
   },
 
   /* Loads the editor on a index */
   gotoIndex: function (e) {
     if (e.which === 13) { // Enter key
       e.preventDefault();
-      var index = parseInt($('.js-unit-index').text(), 10);
+      var index = parseInt(this.unitIndexEl.textContent, 10);
 
       if (index && !isNaN(index) && index > 0 &&
           index <= this.units.total) {
@@ -1669,34 +1564,27 @@ PTL.editor = {
    */
 
   /* Gets the failing check options for the current query */
-  getCheckOptions: function (options) {
-    var checksUrl = l('/xhr/stats/checks/'),
-        reqData = {
-          path: this.settings.pootlePath
-        };
-
-    $.ajax({
-      url: checksUrl,
-      data: reqData,
-      dataType: 'json',
-      success: options.success,
-      error: PTL.editor.error
-    });
+  getCheckOptions: function () {
+    StatsAPI.getChecks(this.settings.pootlePath)
+      .then(
+        (data) => this.appendChecks(data),
+        this.error
+      );
   },
 
   /* Loads units based on checks filtering */
   filterChecks: function () {
-    if (PTL.editor.preventNavigation) {
+    if (this.preventNavigation) {
       return;
     }
-    if (!PTL.editor.canNavigate()) {
+    if (!this.canNavigate()) {
       return false;
     }
 
-    var filterChecks = $('#js-filter-checks').val();
+    var filterChecks = this.$filterChecks.val();
 
     if (filterChecks !== 'none') {
-      var sortBy = $('#js-filter-sort').val(),
+      var sortBy = this.$filterSortBy.val(),
           newHash = {
             filter: 'checks',
             checks: filterChecks
@@ -1711,8 +1599,8 @@ PTL.editor = {
   /* Adds the failing checks to the UI */
   appendChecks: function (checks) {
     if (Object.keys(checks).length) {
-      var $checks = $('#js-filter-checks'),
-          selectedValue = PTL.editor.checks[0] || 'none';
+      var $checks = this.$filterChecks,
+          selectedValue = this.checks[0] || 'none';
 
       $checks.find('optgroup').each(function (e) {
         var empty = true,
@@ -1736,19 +1624,19 @@ PTL.editor = {
       });
 
       $checks.select2(filterSelectOpts).select2('val', selectedValue);
-      $('.js-filter-checks-wrapper').css('display', 'inline-block');
+      this.$filterChecksWrapper.css('display', 'inline-block');
     } else { // No results
-      PTL.editor.displayMsg({body: gettext("No results.")});
-      $('#js-filter-status').select2('val', PTL.editor.filter);
+      this.displayMsg({ body: gettext('No results.') });
+      this.$filterStatus.select2('val', this.filter);
     }
   },
 
   filterSort: function () {
-    const filterBy = $('#js-filter-status').val();
+    const filterBy = this.$filterStatus.val();
     // #104: Since multiple values can't be selected in the select
     // element, we also need to check for `this.checks`.
-    const filterChecks = $('#js-filter-checks').val() || this.checks.join(',');
-    const sortBy = $('#js-filter-sort').val();
+    const filterChecks = this.$filterChecks.val() || this.checks.join(',');
+    const sortBy = this.$filterSortBy.val();
     const user = this.user || null;
 
     let newHash = { filter: filterBy };
@@ -1768,34 +1656,31 @@ PTL.editor = {
 
   /* Loads units based on filtering */
   filterStatus: function () {
-    if (!PTL.editor.canNavigate()) {
+    if (!this.canNavigate()) {
       return false;
     }
 
     // this function can be executed in different contexts,
     // so using the full selector here
-    var $selected = $('#js-filter-status option:selected'),
+    var $selected = this.$filterStatus.find('option:selected'),
         filterBy = $selected.val(),
-        isUserFilter = $selected.data('user'),
-        $checksWrapper = $('.js-filter-checks-wrapper');
+        isUserFilter = $selected.data('user');
 
     if (filterBy === "checks") {
-      PTL.editor.getCheckOptions({
-        success: PTL.editor.appendChecks
-      });
+      this.getCheckOptions();
     } else { // Normal filtering options (untranslated, fuzzy...)
-      $checksWrapper.hide();
+      this.$filterChecksWrapper.hide();
 
-      if (!PTL.editor.preventNavigation) {
+      if (!this.preventNavigation) {
         var newHash = {filter: filterBy};
 
-        if (PTL.editor.user && isUserFilter) {
-          newHash.user = PTL.editor.user;
+        if (this.user && isUserFilter) {
+          newHash.user = this.user;
         } else {
-          PTL.editor.user = null;
+          this.user = null;
           $(".js-user-filter").remove();
 
-          PTL.editor.sortBy !== 'default' && (newHash.sort = PTL.editor.sortBy);
+          this.sortBy !== 'default' && (newHash.sort = this.sortBy);
         }
 
         $.history.load($.param(newHash));
@@ -1804,130 +1689,114 @@ PTL.editor = {
   },
 
   /* Generates the edit context rows' UI */
-  editCtxUI: function (opts) {
-    var defaults = {hasData: false, replace: false};
-    opts = $.extend({}, defaults, opts);
-
-    var editCtxRowBefore = PTL.editor.tmpl.editCtx({
-      hasData: opts.hasData,
-      extraCls: 'before'
+  renderCtxControls: function ({ hasData=false }) {
+    const ctxRowBefore = this.tmpl.editCtx({
+      hasData,
+      extraCls: 'before',
     });
-    var editCtxRowAfter = PTL.editor.tmpl.editCtx({
-      hasData: opts.hasData,
-      extraCls: 'after'
+    const ctxRowAfter = this.tmpl.editCtx({
+      hasData,
+      extraCls: 'after',
     });
 
-    if (opts.replace) {
-      $("tr.edit-ctx.before").replaceWith(editCtxRowBefore);
-      $("tr.edit-ctx.after").replaceWith(editCtxRowAfter);
+    return [ctxRowBefore, ctxRowAfter];
+  },
+
+  replaceCtxControls: function (ctx) {
+    const [ctxRowBefore, ctxRowAfter] = ctx;
+
+    $('tr.edit-ctx.before').replaceWith(ctxRowBefore);
+    $('tr.edit-ctx.after').replaceWith(ctxRowAfter);
+  },
+
+  handleContextSuccess: function (data) {
+    if (!data.ctx.before.length && !data.ctx.after.length) {
+      return undefined;
     }
 
-    return [editCtxRowBefore, editCtxRowAfter];
+    // As we now have got more context rows, increase its gap
+    this.ctxGap += Math.max(data.ctx.before.length,
+                            data.ctx.after.length);
+    cookie('ctxQty', this.ctxGap, { path: '/' });
+
+    // Create context rows HTML
+    const before = this.renderCtxRows(data.ctx.before, 'before');
+    const after = this.renderCtxRows(data.ctx.after, 'after');
+
+    // Append context rows to their respective places
+    var editCtxRows = $("tr.edit-ctx");
+    editCtxRows.first().after(before);
+    editCtxRows.last().before(after);
   },
 
   /* Gets more context units */
-  moreContext: function (initial) {
-    var ctxUrl = l(['/xhr/units/', PTL.editor.units.getCurrent().id, '/context/'].join('')),
-        reqData = {gap: PTL.editor.ctxGap};
-
-    reqData.qty = initial ? PTL.editor.ctxQty : PTL.editor.ctxStep;
-
-    // Don't waste a request if nothing is expected initially
-    if (initial && reqData.qty === 0) {
-      return;
-    }
-
-    $.ajax({
-      url: ctxUrl,
-      async: false,
-      dataType: 'json',
-      data: reqData,
-      success: function (data) {
-        if (data.ctx.before.length || data.ctx.after.length) {
-          // As we now have got more context rows, increase its gap
-          if (initial) {
-            PTL.editor.ctxGap = Math.max(data.ctx.before.length,
-                                         data.ctx.after.length);
-          } else {
-            PTL.editor.ctxGap += Math.max(data.ctx.before.length,
-                                          data.ctx.after.length);
-          }
-          $.cookie('ctxQty', PTL.editor.ctxGap, {path: '/'});
-
-          // Create context rows HTML
-          var before = PTL.editor.buildCtxRows(data.ctx.before, "before"),
-              after = PTL.editor.buildCtxRows(data.ctx.after, "after");
-
-          // Append context rows to their respective places
-          var editCtxRows = $("tr.edit-ctx");
-          editCtxRows.first().after(before);
-          editCtxRows.last().before(after);
-        }
-      },
-      error: PTL.editor.error
-    });
+  moreContext: function (amount=CTX_STEP) {
+    return (
+      UnitAPI.getContext(this.units.getCurrent().id,
+                         { gap: this.ctxGap, qty: amount })
+        .then(
+          (data) => this.handleContextSuccess(data),
+          this.error
+        )
+    );
   },
 
   /* Shrinks context lines */
   lessContext: function () {
-
-    var before = $(".ctx-row.before"),
-        after = $(".ctx-row.after");
+    const $before = $('.ctx-row.before');
+    const $after = $('.ctx-row.after');
 
     // Make sure there are context rows before decreasing the gap and
     // removing any context rows
-    if (before.length || after.length) {
-      if (before.length === PTL.editor.ctxGap) {
-        before.slice(0, PTL.editor.ctxStep).remove();
+    if ($before.length || $after.length) {
+      if ($before.length === this.ctxGap) {
+        $before.slice(0, CTX_STEP).remove();
       }
 
-      if (after.length === PTL.editor.ctxGap) {
-        after.slice(-PTL.editor.ctxStep).remove();
+      if ($after.length === this.ctxGap) {
+        $after.slice(-CTX_STEP).remove();
       }
 
-      PTL.editor.ctxGap -= PTL.editor.ctxStep;
+      this.ctxGap -= CTX_STEP;
 
-      if (PTL.editor.ctxGap >= 0) {
-        if (PTL.editor.ctxGap === 0) {
-          PTL.editor.editCtxUI({hasData: false, replace: true});
-          $.cookie('ctxShow', false, {path: '/'});
+      if (this.ctxGap >= 0) {
+        if (this.ctxGap === 0) {
+          this.replaceCtxControls(this.renderCtxControls({ hasData: false }));
         }
 
-        $.cookie('ctxQty', PTL.editor.ctxGap, {path: '/'});
+        cookie('ctxQty', this.ctxGap, { path: '/' });
       }
     }
   },
 
   /* Shows context rows */
   showContext: function () {
+    const $before = $('.ctx-row.before');
+    const $after = $('.ctx-row.after');
 
-    var editCtxRowBefore, editCtxRowAfter,
-        before = $(".ctx-row.before"),
-        after = $(".ctx-row.after");
-
-    if (before.length || after.length) {
-      before.show();
-      after.show();
-    } else {
-      PTL.editor.moreContext(true);
+    if ($before.length || $after.length) {
+      $before.show();
+      $after.show();
+      this.replaceCtxControls(this.renderCtxControls({ hasData: true }))
+    } else if (this.ctxQty > 0) {
+      // This is an initial request for context, reset `ctxGap`
+      this.ctxGap = 0;
+      this.moreContext(this.ctxQty)
+          .then(() => {
+            this.replaceCtxControls(this.renderCtxControls({ hasData: true }))
+          });
     }
-
-    PTL.editor.editCtxUI({hasData: true, replace: true});
-    $.cookie('ctxShow', true, {path: '/'});
   },
 
   /* Hides context rows */
   hideContext: function () {
+    const $before = $('.ctx-row.before');
+    const $after = $('.ctx-row.after');
 
-    var editCtxRowBefore, editCtxRowAfter,
-        before = $(".ctx-row.before"),
-        after = $(".ctx-row.after");
+    $before.hide();
+    $after.hide();
 
-    before.hide();
-    after.hide();
-
-    PTL.editor.editCtxUI({hasData: false, replace: true});
-    $.cookie('ctxShow', false, {path: '/'});
+    this.replaceCtxControls(this.renderCtxControls({ hasData: false }));
   },
 
 
@@ -1952,54 +1821,43 @@ PTL.editor = {
   /*
    * Comments
    */
-  comment: function (e) {
+
+  addComment: function (e) {
     e.preventDefault();
+    this.updateCommentDefaultProperties();
 
-    PTL.editor.updateCommentDefaultProperties();
+    UnitAPI.addComment(this.units.getCurrent().id, $(e.target).serializeObject())
+      .then(
+        (data) => this.processAddComment(data),
+        this.error
+      );
+  },
 
-    var url = $(this).attr('action'),
-        reqData = $(this).serializeObject();
+  processAddComment: function (data) {
+    $('.js-editor-comment').removeClass('selected');
+    $("#editor-comment").fadeOut(200);
 
-    $.ajax({
-      url: url,
-      type: 'POST',
-      data: reqData,
-      success: function (data) {
-        $('.js-editor-comment').removeClass('selected');
-        $("#editor-comment").fadeOut(200);
+    if ($("#translator-comment").length) {
+      $(data.comment).hide().prependTo("#translator-comment").delay(200)
+        .animate({height: 'show'}, 1000, 'easeOutQuad');
+    } else {
+      $(`<div id="translator-comment">${data.comment}</div>`)
+        .prependTo("#extras-container").delay(200)
+        .hide().animate({height: 'show'}, 1000, 'easeOutQuad');
+    }
 
-        if ($("#translator-comment").length) {
-          $(data.comment).hide().prependTo("#translator-comment").delay(200)
-                         .animate({height: 'show'}, 1000, 'easeOutQuad');
-        } else {
-          var commentHtml = '<div id="translator-comment">' + data.comment
-                          + '</div>';
-          $(commentHtml).prependTo("#extras-container").delay(200)
-                        .hide().animate({height: 'show'}, 1000, 'easeOutQuad');
-        }
-
-        helpers.updateRelativeDates();
-      },
-      error: PTL.editor.error
-    });
-
-    return false;
+    helpers.updateRelativeDates();
   },
 
   /* Removes last comment */
   removeComment: function (e) {
     e.preventDefault();
 
-    var url = $(this).data('url');
-
-    $.ajax({
-      url: url,
-      type: 'DELETE',
-      success: function () {
-        $('.js-comment-first').fadeOut(200);
-      },
-      error: PTL.editor.error
-    });
+    UnitAPI.removeComment(this.units.getCurrent().id)
+      .then(
+        () => $('.js-comment-first').fadeOut(200),
+        this.error
+      );
   },
 
 
@@ -2009,60 +1867,49 @@ PTL.editor = {
 
   /* Get the timeline data */
   showTimeline: function () {
-    // The results might already be there from earlier:
     const $results = $('#timeline-results');
     if ($results.length) {
       $results.slideDown(1000, 'easeOutQuad');
       return;
     }
 
-    var uid = PTL.editor.units.getCurrent().id,
-        node = $(".translate-container"),
-        timelineUrl = l(['/xhr/units/', uid, '/timeline/'].join(''));
+    const $node = $('.translate-container');
+    $node.spin();
 
-    node.spin();
-
-    // Always abort previous requests so we only get results for the
-    // current unit
-    if (PTL.editor.timelineReq !== null) {
-      PTL.editor.timelineReq.abort();
-    }
-
-    PTL.editor.timelineReq = $.ajax({
-      url: timelineUrl,
-      dataType: 'json',
-      success: function (data) {
-        var uid = data.uid;
-
-        if (data.timeline && uid === PTL.editor.units.getCurrent().id) {
-          if ($("#translator-comment").length) {
-            $(data.timeline).hide().insertAfter("#translator-comment")
-                            .slideDown(1000, 'easeOutQuad');
-          } else {
-            $(data.timeline).hide().prependTo("#extras-container")
-                            .slideDown(1000, 'easeOutQuad');
-          }
-
-          helpers.updateRelativeDates();
-
-          $('.timeline-field-body').filter(':not([dir])').bidi();
-          $("#js-show-timeline").addClass('selected');
-        }
-      },
-      complete: function () {
-        node.spin(false);
-      },
-      error: PTL.editor.error
-    });
+    UnitAPI.getTimeline(this.units.getCurrent().id)
+      .then(
+        (data) => this.renderTimeline(data),
+        this.error
+      )
+      .always(() => $node.spin(false));
   },
 
- /* Hide the timeline panel */
+  renderTimeline: function (data) {
+    const uid = data.uid;
+
+    if (data.timeline && uid === this.units.getCurrent().id) {
+      if ($("#translator-comment").length) {
+        $(data.timeline).hide().insertAfter("#translator-comment")
+                        .slideDown(1000, 'easeOutQuad');
+      } else {
+        $(data.timeline).hide().prependTo("#extras-container")
+                        .slideDown(1000, 'easeOutQuad');
+      }
+
+      helpers.updateRelativeDates();
+
+      $('.timeline-field-body').filter(':not([dir])').bidi();
+      $("#js-show-timeline").addClass('selected');
+    }
+  },
+
+  /* Hide the timeline panel */
   toggleTimeline: function (e) {
     e.preventDefault();
     const $timelineToggle = $('#js-toggle-timeline');
     $timelineToggle.toggleClass('selected');
     if ($timelineToggle.hasClass('selected')) {
-      PTL.editor.showTimeline();
+      this.showTimeline();
     } else {
       $("#timeline-results").slideUp(1000, 'easeOutQuad');
     }
@@ -2080,13 +1927,13 @@ PTL.editor = {
     var filtered = [];
 
     if (results.length > 0 && results[0].source === sourceText) {
-      var $element = $(PTL.editor.focused);
+      var $element = $(this.focused);
       // set only if the textarea is empty
       if ($element.val() === '') {
         var text = results[0].target;
         $element.val(text).trigger('input');
         $element.caret(text.length, text.length);
-        PTL.editor.goFuzzy();
+        this.goFuzzy();
       }
     }
 
@@ -2111,14 +1958,16 @@ PTL.editor = {
         src = store.get('source_lang'),
         tgt = store.get('target_lang'),
         sourceText = unit.get('source')[0],
-        filtered = PTL.editor.filterTMResults(data, sourceText),
+        filtered = this.filterTMResults(data, sourceText),
         name = gettext("Similar translations");
 
     if (filtered.length) {
-      return PTL.editor.tmpl.tm({store: store.toJSON(),
-                                 unit: unit.toJSON(),
-                                 suggs: filtered,
-                                 name: name});
+      return this.tmpl.tm({
+        store: store.toJSON(),
+        unit: unit.toJSON(),
+        suggs: filtered,
+        name: name,
+      });
     }
 
     return '';
@@ -2136,12 +1985,11 @@ PTL.editor = {
           "/unit/?source=" + encodeURIComponent(sText) + "&jsoncallback=?";
 
     if (!sText.length) {
-        // No use in looking up an empty string
-        return;
+      return;
     }
 
     if (pStyle.length && pStyle != "standard") {
-        tmUrl += '&style=' + pStyle;
+      tmUrl += '&style=' + pStyle;
     }
 
     // Always abort previous requests so we only get results for the
@@ -2156,9 +2004,7 @@ PTL.editor = {
       dataType: 'jsonp',
       cache: true,
       success: function (data) {
-        var uid = this.callback.slice(6);
-
-        if (uid === unit.id && data.length) {
+        if (data.length) {
           var sourceText = unit.get('source')[0],
               filtered = PTL.editor.filterTMResults(data, sourceText),
               name = gettext("Similar translations"),
@@ -2177,291 +2023,136 @@ PTL.editor = {
 
 
   /* Rejects a suggestion */
-  rejectSuggestion: function (e) {
-    e.stopPropagation(); //we don't want to trigger a click on the text below
-    var suggId = $(this).data("sugg-id"),
-        element = $("#suggestion-" + suggId),
-        unit = PTL.editor.units.getCurrent();
+  rejectSuggestion: function (suggId) {
+    UnitAPI.rejectSuggestion(this.units.getCurrent().id, suggId)
+      .then(
+        (data) => this.processRejectSuggestion(data, suggId),
+        this.error
+      );
+  },
 
-    const url = l(`/xhr/units/${unit.id}/suggestions/${suggId}/`);
+  processRejectSuggestion: function (data, suggId) {
+    if (data.user_score) {
+      score.set(data.user_score);
+    }
 
-    $.ajax({
-      url: url,
-      type: 'DELETE',
-      success: (data) => {
-        if (data.user_score) {
-          score.set(data.user_score);
-        }
+    $(`#suggestion-${suggId}`).fadeOut(200, function () {
+      $(this).remove();
 
-        element.fadeOut(200, function () {
-          $(this).remove();
-
-          // Go to the next unit if there are no more suggestions left
-          if (!$('.js-user-suggestion').length) {
-            PTL.editor.gotoNext();
-          }
-        });
-        $('.js-comment-first').fadeOut(200);
-      },
-      error: PTL.editor.error,
+      // Go to the next unit if there are no more suggestions left
+      if (!$('.js-user-suggestion').length) {
+        PTL.editor.gotoNext();
+      }
     });
   },
 
 
   /* Accepts a suggestion */
-  acceptSuggestion: function (e, skipToNext) {
-    e.stopPropagation(); //we don't want to trigger a click on the text below
-    var suggId = $(this).data("sugg-id"),
-        element = $("#suggestion-" + suggId),
-        unit = PTL.editor.units.getCurrent(),
-        skipToNext = skipToNext || false,
-        translations;
+  acceptSuggestion: function (suggId, { skipToNext=false } = {}) {
+    UnitAPI.acceptSuggestion(this.units.getCurrent().id, suggId)
+      .then(
+        (data) => this.processAcceptSuggestion(data, suggId, skipToNext),
+        this.error
+      );
+  },
 
-    const url = l(`/xhr/units/${unit.id}/suggestions/${suggId}/`);
-
-    $.ajax({
-      url: url,
-      type: 'POST',
-      success: (data) => {
-        // Update target textareas
-        $.each(data.newtargets, function (i, target) {
-          $("#id_target_f_" + i).val(target).focus();
-        });
-
-        // Update remaining suggestion's diff
-        $.each(data.newdiffs, function (suggId, sugg) {
-          $.each(sugg, function (i, target) {
-             $("#suggdiff-" + suggId + "-" + i).html(target);
-          });
-        });
-
-        // FIXME: handle this via events
-        translations = $('.js-translation-area').map(function (i, el) {
-          return $(el).val();
-        }).get();
-        unit.setTranslation(translations);
-        unit.set('isfuzzy', false);
-
-        if (data.user_score) {
-          score.set(data.user_score);
-        }
-
-        let hasCriticalChecks = !!data.checks;
-        $('.translate-container').toggleClass('error', hasCriticalChecks);
-        if (hasCriticalChecks) {
-          _refreshChecksSnippet(data.checks);
-        }
-
-        element.fadeOut(200, function () {
-          $(this).remove();
-
-          // Go to the next unit if there are no more suggestions left,
-          // providing there are no critical failing checks
-          if (!hasCriticalChecks &&
-              (skipToNext || !$('.js-user-suggestion').length)) {
-            PTL.editor.gotoNext();
-          }
-        });
-      },
-      error: PTL.editor.error,
+  processAcceptSuggestion: function (data, suggId, skipToNext) {
+    // Update target textareas
+    $.each(data.newtargets, function (i, target) {
+      $(`#id_target_f_${i}`).val(target).focus();
     });
 
+    // Update remaining suggestion's diff
+    $.each(data.newdiffs, function (suggId, sugg) {
+      $.each(sugg, function (i, target) {
+         $(`#suggdiff-${suggId}-${i}`).html(target);
+      });
+    });
+
+    // FIXME: handle this via events
+    const translations = $('.js-translation-area').map(function (i, el) {
+      return $(el).val();
+    }).get();
+    const unit = this.units.getCurrent();
+    unit.setTranslation(translations);
+    unit.set('isfuzzy', false);
+
+    if (data.user_score) {
+      score.set(data.user_score);
+    }
+
+    const hasCriticalChecks = !!data.checks;
+    $('.translate-container').toggleClass('error', hasCriticalChecks);
+    if (hasCriticalChecks) {
+      _refreshChecksSnippet(data.checks);
+    }
+
+    $(`#suggestion-${suggId}`).fadeOut(200, function () {
+      $(this).remove();
+
+      // Go to the next unit if there are no more suggestions left,
+      // provided there are no critical failing checks
+      if (!hasCriticalChecks && (skipToNext || !$('.js-user-suggestion').length)) {
+        PTL.editor.gotoNext();
+      }
+    });
   },
 
   /* Mutes or unmutes a quality check marking it as false positive or not */
-  toggleCheck: function () {
-    var check = $(this).parent(),
-        checkId = $(this).data("check-id"),
-        uId = PTL.editor.units.getCurrent().id,
-        url = l(['/xhr/units/', uId, '/checks/', checkId, '/toggle/'].join('')),
-        falsePositive = !check.hasClass('false-positive'), // toggled value
-        post = {},
-        error;
+  toggleCheck: function (checkId) {
+    const $check = $(`.js-check-${checkId}`);
+    const isFalsePositive = !$check.hasClass('false-positive');
 
-    if (falsePositive) {
-      post.mute = 1;
-    }
+    UnitAPI.toggleCheck(this.units.getCurrent().id, checkId,
+                        { mute: isFalsePositive })
+      .then(
+        () => this.processToggleCheck(checkId, isFalsePositive),
+        this.error
+      );
+  },
 
-    $.post(url, post,
-      function (data) {
-        check.toggleClass('false-positive', falsePositive);
+  processToggleCheck: function (checkId, isFalsePositive) {
+    $(`.js-check-${checkId}`).toggleClass('false-positive', isFalsePositive);
 
-        error = $('#translate-checks-block .check')
-                  .not('.false-positive').size() > 0;
+    const hasError = $('#translate-checks-block .check')
+      .not('.false-positive').size() > 0;
 
-        $('.translate-container').toggleClass('error', error);
-      }, "json");
+    $('.translate-container').toggleClass('error', hasError);
   },
 
   /*
    * Machine Translation
    */
 
-  /* Checks whether the provided source is supported */
-  isSupportedSource: function (pairs, source) {
-    for (var i in pairs) {
-      if (source === pairs[i].source) {
-        return true;
-      }
+  runHooks: function () {
+    mtProviders.forEach((provider) => provider.init({
+      unit: this.units.getCurrent().toJSON(),
+    }));
+  },
+
+  /* FIXME: provide an alternative to such an ad-hoc entry point */
+  setTranslation: function(opts) {
+    const { translation } = opts;
+    if (translation === undefined && opts.msg) {
+      that.displayError(opts.msg);
+      return false;
     }
-    return false;
+
+    const area = document.querySelector('.js-translation-area');
+
+    area.value = translation;
+    autosize.update(area);
+
+    // Save a copy of the resulting text in the DOM for further
+    // similarity comparisons
+    area.dataset.translationAidMt = translation;
+
+    area.dispatchEvent((new Event('input')));
+    area.focus();
+
+    this.goFuzzy();
+
+    return true;
   },
-
-
-  /* Checks whether the provided target is supported */
-  isSupportedTarget: function (pairs, target) {
-    for (var i in pairs) {
-      if (target === pairs[i].target) {
-        return true;
-      }
-    }
-    return false;
-  },
-
-
-  /* Checks whether the provided source-target pair is supported */
-  isSupportedPair: function (pairs, source, target) {
-    for (var i in pairs) {
-      if (source === pairs[i].source &&
-          target === pairs[i].target) {
-        return true;
-      }
-    }
-    return false;
-  },
-
-
-  /* Adds a new MT service button in the editor toolbar */
-  addMTButton: function (container, aClass, tooltip) {
-      var btn = '<a class="translate-mt ' + aClass + '">';
-      btn += '<i class="icon-' + aClass+ '" title="' + tooltip + '"><i/></a>';
-      $(container).first().prepend(btn);
-  },
-
-  /* Goes through all source languages and adds a new MT service button
-   * in the editor toolbar if the language is supported
-   */
-  addMTButtons: function (provider) {
-    if (this.isSupportedTarget(provider.pairs, PTL.editor.settings.targetLang)) {
-      var that = this,
-          $sources = $(".translate-toolbar"),
-          ok;
-
-      $sources.each(function () {
-        var source = that.normalizeCode($(this).parents('.source-language').find('.translation-text').attr("lang"));
-
-        if (provider.validatePairs) {
-          ok = that.isSupportedPair(provider.pairs, source, PTL.editor.settings.targetLang);
-        } else {
-          ok = that.isSupportedSource(provider.pairs, source);
-        }
-
-        if (ok) {
-          that.addMTButton($(this).find('.js-toolbar-buttons'),
-            provider.buttonClassName,
-            provider.hint + ' (' + source.toUpperCase() + '&rarr;' + PTL.editor.settings.targetLang.toUpperCase() + ')');
-        }
-      });
-    }
-  },
-
-  /* Normalizes language codes in order to use them in MT services */
-  normalizeCode: function (locale) {
-    if (locale) {
-      var clean = locale.replace('_', '-');
-      var atIndex = locale.indexOf('@');
-      if (atIndex !== -1) {
-        clean = clean.slice(0, atIndex);
-      }
-      return clean;
-    }
-    return locale;
-  },
-
-  collectArguments: function (s) {
-    this.argSubs[this.argPos] = s;
-    return "[" + (this.argPos++) + "]";
-  },
-
-  translate: function (linkObject, providerCallback) {
-    var that = this,
-        $areas = $('.js-translation-area'),
-        $sources = $(linkObject).parents('.source-language').find('.translation-text'),
-        langFrom = PTL.editor.normalizeCode($sources[0].lang),
-        langTo = PTL.editor.normalizeCode($areas[0].lang);
-
-    var htmlPat = /<[\/]?\w+.*?>/g,
-    // The printf regex based on http://phpjs.org/functions/sprintf:522
-        cPrintfPat = /%%|%(\d+\$)?([-+\'#0 ]*)(\*\d+\$|\*|\d+)?(\.(\*\d+\$|\*|\d+))?([scboxXuidfegEG])/g,
-        csharpStrPat = /{\d+(,\d+)?(:[a-zA-Z ]+)?}/g,
-        percentNumberPat = /%\d+/g,
-        pos = 0;
-
-    $sources.each(function (j) {
-      // Reset collected arguments array and counter
-      that.argSubs = [];
-      that.argPos = 0;
-
-      // Walk through known patterns and replace them with [N] placeholders
-      var sourceText = $(this).text()
-                              .replace(htmlPat,
-                                       that.collectArguments.bind(that))
-                              .replace(cPrintfPat,
-                                       that.collectArguments.bind(that))
-                              .replace(csharpStrPat,
-                                       that.collectArguments.bind(that))
-                              .replace(percentNumberPat,
-                                       that.collectArguments.bind(that));
-
-      providerCallback(sourceText, langFrom, langTo, function (opts) {
-        var translation = opts.translation,
-            msg = opts.msg,
-            area = $areas[j],
-            $area = $areas.eq(j),
-            i, value;
-
-        if (translation === undefined && msg) {
-          PTL.editor.displayError(msg);
-          return;
-        }
-
-        // Fix whitespace which may have been added around [N] blocks
-        for (i=0; i<that.argSubs.length; i++) {
-          if (sourceText.match(new RegExp("\\[" + i + "\\][^\\s]"))) {
-            translation = translation.replace(
-              new RegExp("\\[" + i + "\\]\\s+"), "[" + i + "]"
-            );
-          }
-          if (sourceText.match(new RegExp("[^\\s]\\[" + i + "\\]"))) {
-            translation = translation.replace(
-              new RegExp("\\s+\\[" + i + "\\]"), "[" + i + "]"
-            );
-          }
-        }
-
-        // Replace temporary [N] placeholders back to their real values
-        for (i=0; i<that.argSubs.length; i++) {
-          value = that.argSubs[i].replace(/\&/g, '&amp;')
-                                 .replace(/\</g, '&lt;')
-                                 .replace(/\>/g, '&gt;');
-          translation = translation.replace("[" + i + "]", value);
-        }
-
-        $area.val($('<div />').html(translation).text());
-        autosize.update(area);
-
-        // Save a copy of the resulting text in the DOM for further
-        // similarity comparisons
-        if (opts.storeResult) {
-          $area.attr('data-translation-aid-mt', translation);
-        }
-      });
-    });
-
-    $areas.eq(0).trigger('input').focus();
-
-    PTL.editor.goFuzzy();
-    return false;
-  }
 
 };

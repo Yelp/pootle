@@ -6,29 +6,28 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
-// Required for `Promise` support
-import 'babel-core/polyfill';
+import 'backbone-safesync';
+import $ from 'jquery';
+import 'jquery-magnific-popup';
+import 'jquery-select2';
+import 'jquery-tipsy';
+import Spinner from 'spin';
 
 import cookie from 'utils/cookie';
+import diff from 'utils/diff';
 
-// Aliased non-commonJS modules
-
-// Major libraries
-var $ = require('jquery');
-
-// jQuery plugins
-require('jquery-cookie');
-require('jquery-magnific-popup');
-require('jquery-select2');
-require('jquery-tipsy');
-
-// Backbone plugins
-require('backbone-safesync');
-
-// Other plugins
-var Spinner = require('spin');
+import agreement from './agreement';
+import auth from './auth';
+import browser from './browser';
+import captcha from './captcha';
+import contact from './contact';
+import dropdown from './dropdown';
+import helpers from './helpers';
+import score from './score';
+import search from './search';
+import stats from './stats';
+import configureStore from './store';
+import utils from './utils';
 
 
 Spinner.defaults = {
@@ -59,21 +58,21 @@ Spinner.defaults = {
 
 window.PTL = window.PTL || {};
 
-PTL.auth = require('./auth');
-PTL.agreement = require('./agreement.js');
-PTL.browser = require('./browser.js');
-PTL.captcha = require('./captcha.js');
-PTL.contact = require('./contact.js');
-PTL.dropdown = require('./dropdown.js');
-PTL.msg = require('./msg.js');
-PTL.search = require('./search.js');
-PTL.score = require('./score.js');
-PTL.stats = require('./stats.js');
-PTL.utils = require('./utils.js');
+PTL.auth = auth;
+PTL.agreement = agreement;
+PTL.browser = browser;
+PTL.captcha = captcha;
+PTL.cookie = cookie;
+PTL.contact = contact;
+PTL.dropdown = dropdown;
+PTL.score = score;
+PTL.search = search;
+PTL.stats = stats;
+PTL.utils = utils;
+PTL.utils.diff = diff;
 
 
-var helpers = require('./helpers.js');
-var utils = require('./utils.js');
+PTL.store = configureStore();
 
 
 PTL.common = {
@@ -137,12 +136,12 @@ PTL.common = {
       var $sidebar = $('.js-sidebar'),
           openClass = 'sidebar-open',
           cookieName = 'pootle-browser-sidebar',
-          cookieData = JSON.parse($.cookie(cookieName)) || {};
+          cookieData = JSON.parse(cookie(cookieName)) || {};
 
       $sidebar.toggleClass(openClass);
 
       cookieData.isOpen = $sidebar.hasClass(openClass);
-      $.cookie(cookieName, JSON.stringify(cookieData), {path: '/'});
+      cookie(cookieName, JSON.stringify(cookieData), { path: '/' });
     });
 
     /* Popups */

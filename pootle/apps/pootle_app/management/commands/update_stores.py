@@ -20,15 +20,22 @@ from pootle_translationproject.models import scan_translation_projects
 
 class Command(PootleCommand):
     option_list = PootleCommand.option_list + (
-        make_option('--overwrite', action='store_true', dest='overwrite',
-                    default=False,
-                    help="Don't just update untranslated units "
-                         "and add new units, but overwrite database "
-                         "translations to reflect state in files."),
-        make_option('--force', action='store_true', dest='force', default=False,
-                    help="Unconditionally process all files (even if they "
-                         "appear unchanged)."),
-        )
+        make_option(
+            '--overwrite',
+            action='store_true',
+            dest='overwrite',
+            default=False,
+            help="Don't just update untranslated units "
+                 "and add new units, but overwrite database "
+                 "translations to reflect state in files."),
+        make_option(
+            '--force',
+            action='store_true',
+            dest='force',
+            default=False,
+            help="Unconditionally process all files (even if they "
+                 "appear unchanged)."),
+    )
     help = "Update database stores from files."
 
     def handle_translation_project(self, translation_project, **options):
@@ -44,10 +51,16 @@ class Command(PootleCommand):
         return False
 
     def handle_store(self, store, **options):
-        overwrite = options.get('overwrite', False)
-        force = options.get('force', False)
+        if not store.file:
+            return
+        disk_mtime = store.get_file_mtime()
+        if not options["force"] and disk_mtime == store.file_mtime:
+            # The file on disk wasn't changed since the last sync
+            logging.debug(u"File didn't change since last sync, skipping "
+                          u"%s" % store.pootle_path)
+            return
 
-        store.update(overwrite=overwrite, only_newer=not force)
+        store.update_from_disk(overwrite=options["overwrite"])
 
     def handle_all(self, **options):
         scan_translation_projects(languages=self.languages,

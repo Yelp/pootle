@@ -34,8 +34,9 @@ from pootle.core.url_helpers import (get_editor_filter, get_path_sortkey,
                                      split_pootle_path, to_tp_relative_path)
 from pootle_app.models.directory import Directory
 from pootle_app.models.permissions import PermissionSet
-from pootle_store.filetypes import filetype_choices, factory_classes
+from pootle_store.filetypes import factory_classes
 from pootle_store.util import absolute_real_path
+from staticpages.models import StaticPage
 
 
 RESERVED_PROJECT_CODES = ('admin', 'translate', 'settings')
@@ -157,7 +158,7 @@ class Project(models.Model, CachedTreeItem, ProjectURLMixin):
             verbose_name=_('Quality Checks'))
 
     localfiletype = models.CharField(max_length=50, default="po",
-            choices=filetype_choices, verbose_name=_('File Type'))
+                                     verbose_name=_('File Type'))
 
     treestyle_choices = (
             # TODO: check that the None is stored and handled correctly
@@ -388,7 +389,7 @@ class Project(models.Model, CachedTreeItem, ProjectURLMixin):
     def clean(self):
         if self.code in RESERVED_PROJECT_CODES:
             raise ValidationError(
-                _('"%s" cannot be used as a project code' % (self.code,))
+                _('"%s" cannot be used as a project code', self.code)
             )
 
     ### TreeItem
@@ -408,6 +409,10 @@ class Project(models.Model, CachedTreeItem, ProjectURLMixin):
     def get_children_for_user(self, user):
         """Returns children translation projects for a specific `user`."""
         return self.translationproject_set.for_user(user)
+
+    def get_announcement(self, user=None):
+        """Return the related announcement, if any."""
+        return StaticPage.get_announcement_for(self.pootle_path, user)
 
     def get_real_path(self):
         return absolute_real_path(self.code)

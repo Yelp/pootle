@@ -6,15 +6,13 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
+import $ from 'jquery';
+import 'jquery-select2';
+import _ from 'underscore';
 
-var $ = require('jquery');
-var _ = require('underscore');
+import cookie from 'utils/cookie';
 
-require('jquery-cookie');
-require('jquery-select2');
-
-var utils = require('./utils.js');
+import utils from './utils';
 
 
 var sel = {
@@ -30,6 +28,7 @@ var actionMap = {
   'browse': '',
   'translate': 'translate',
   'admin-permissions': 'admin/permissions',
+  'admin-characters': 'admin/characters',
   'admin-languages': 'admin/languages',
   'admin-terminology': 'terminology',
 };
@@ -127,17 +126,16 @@ var formatResource = function (path, container, query) {
 
   return [
     '<span class="', $el.data('icon'), '">',
-      '<i class="icon-', $el.data('icon'), '"></i>',
-      '<span class="text">', t, '</span>',
-    '</span>'
+    '<i class="icon-', $el.data('icon'), '"></i>',
+    '<span class="text">', _.escape(t), '</span>',
+    '</span>',
   ].join('');
 };
 
 
 function formatProject(path, container, query) {
   const state = path.element[0].dataset.state;
-
-  return `<span class="text project-${state}">${path.text}</span>`;
+  return `<span class="text project-${state}">${_.escape(path.text)}</span>`;
 };
 
 
@@ -230,11 +228,11 @@ var browser = {
 
     var changed = projChanged ? 'project' :
                   langChanged ? 'language' : 'resource';
-    $.cookie('user-choice', changed, {path: '/'});
+    cookie('user-choice', changed, { path: '/' });
 
     // Remember the latest language the user switched to
     if (langChanged) {
-      $.cookie('pootle-language', languageCode, {path: '/'});
+      cookie('pootle-language', languageCode, { path: '/' });
     }
 
     window.location.href = newUrl;
@@ -243,4 +241,4 @@ var browser = {
 };
 
 
-module.exports = browser;
+export default browser;

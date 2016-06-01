@@ -243,6 +243,7 @@ def test_accept_suggestion_changes_state(issue_2401_po, system):
     unit.accept_suggestion(suggestion, tp, system)
     assert unit.state == TRANSLATED
 
+
 @pytest.mark.django_db
 def test_accept_suggestion_update_wordcount(it_tutorial_po, system):
     """Tests that accepting a suggestion for an untranslated unit will
@@ -250,7 +251,7 @@ def test_accept_suggestion_update_wordcount(it_tutorial_po, system):
     """
 
     # Parse store
-    it_tutorial_po.update(overwrite=False, only_newer=False)
+    it_tutorial_po.update(it_tutorial_po.file.store)
 
     untranslated_unit = it_tutorial_po.getitem(0)
     suggestion_text = 'foo bar baz'

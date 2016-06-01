@@ -6,13 +6,11 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 
 
-let AuthContent = React.createClass({
+const AuthContent = React.createClass({
   mixins: [PureRenderMixin],
 
   render() {

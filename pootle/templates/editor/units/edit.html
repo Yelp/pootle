@@ -106,17 +106,16 @@
                 <div class="language-name">{{ altunit.store.translation_project.language.name }}</div>
                 {% if cansuggest or cantranslate %}
                 <div class="translate-toolbar">
-                  <span class="js-toolbar-buttons">
-                    <a class="icon-copy js-copyoriginal" data-uid="{{ altunit.id }}"
-                       title="{% trans 'Copy into translation' %}" accesskey="c"></a>
-                  </span>
+                  <span class="js-mt-{{ altunit.store.translation_project.language.code }}"></span>
+                  <a class="icon-copy js-copyoriginal" data-uid="{{ altunit.id }}"
+                     title="{% trans 'Copy into translation' %}" accesskey="c"></a>
                 </div>
                 {% endif %}
               </div>
               <div id="js-unit-{{ altunit.id }}"
                    class="translate-original{% if unit.hasplural %} translate-plural{% endif %}">
                 {% for i, target, title in altunit|pluralize_target %}
-                <div class="translation-text" lang="{{ altunit.store.translation_project.language.code }}" dir="{{ altunit.store.translation_project.language.direction }}"{% if title %} title="{{ title }}"{% endif %}>{{ target|fancy_highlight }}</div>
+                <div class="translation-text js-translation-text" lang="{{ altunit.store.translation_project.language.code }}" dir="{{ altunit.store.translation_project.language.direction }}"{% if title %} title="{{ title }}"{% endif %}>{{ target|fancy_highlight }}</div>
                 {% endfor %}
                 <div class="placeholder"></div>
               </div>
@@ -134,17 +133,16 @@
                       {% trans "Report a problem with this string" %}
                     </a>
                   </span>
-                  <span class="js-toolbar-buttons">
-                    <a class="icon-copy js-copyoriginal" data-uid="{{ unit.id }}"
-                       title="{% trans 'Copy into translation' %}" accesskey="c"></a>
-                  </span>
+                  <span class="js-mt-{{ source_language.code }}"></span>
+                  <a class="icon-copy js-copyoriginal" data-uid="{{ unit.id }}"
+                     title="{% trans 'Copy into translation' %}" accesskey="c"></a>
                 </div>
                 {% endif %}
               </div>
               <div id="js-unit-{{ unit.id }}"
                    class="translate-original{% if unit.hasplural %} translate-plural{% endif %}">
                 {% for i, source, title in unit|pluralize_source %}
-                <div class="translation-text" lang="{{ source_language.code }}" dir="{{ source_language.direction }}"{% if title %} title="{{ title }}"{% endif %}>{{ source|fancy_highlight }}</div>
+                <div class="translation-text js-translation-text" lang="{{ source_language.code }}" dir="{{ source_language.direction }}"{% if title %} title="{{ title }}"{% endif %}>{{ source|fancy_highlight }}</div>
                 {% endfor %}
                 <div class="placeholder"></div>
               </div>
@@ -252,12 +250,13 @@
             {% endif %}
           </div>
         </form>
-        {% block translator_comment_edit_form %}
+        {% block translator_comment_form_wrapper %}
         {% if cantranslate %}
         <div id="editor-comment" class="js-editor-comment-form hide">
-          <form id="js-comment-form" method="POST"
-            action="{% url 'pootle-xhr-units-comment' unit.id %}">
+          <form id="js-comment-form">
+            {% block translator_comment_form %}
             {{ comment_form.translator_comment }}
+            {% endblock %}
             <input type="submit" class="btn btn-xs btn-primary"
                       value="{% trans 'Submit' %}" />
           </form>
@@ -284,6 +283,7 @@
           <div id="suggestion-{{ sugg.id }}"
             class="js-user-suggestion js-editor-copytext extra-item-block"
             data-action="overwrite" data-translation-aid="{{ sugg.target }}"
+            data-sugg-id="{{ sugg.id }}"
             data-suggestor-id="{{ sugg.user.id }}">
             {% for i, target, diff, title in sugg|pluralize_diff_sugg %}
             <div class="extra-item-content">
@@ -304,14 +304,12 @@
                   <i class="icon-reject" dir="{% locale_dir %}"
                     title="{% trans 'Reject suggestion' %}"></i>
                 </a>
-                {% else %}
-                {% if user.is_authenticated and profile == sugg.user %}
+                {% elif user.is_authenticated and profile == sugg.user %}
                 <a accesskey="r" class="suggestion-action js-suggestion-reject"
                   data-sugg-id="{{ sugg.id }}">
                   <i class="icon-reject" dir="{% locale_dir %}"
                     title="{% trans 'Remove suggestion' %}"></i>
                 </a>
-                {% endif %}
                 {% endif %}
 
                 <div id="suggdiff-{{sugg.id}}-{{i}}" class="suggestion-translation"

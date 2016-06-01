@@ -6,16 +6,15 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 
+import { requestPasswordReset } from '../actions';
 import AuthContent from './AuthContent';
 import RequestPasswordResetProgress from './RequestPasswordResetProgress';
 
 
-let RequestPasswordResetSent = React.createClass({
+const RequestPasswordResetSent = React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
@@ -27,9 +26,9 @@ let RequestPasswordResetSent = React.createClass({
   /* Handlers */
 
   handleResendEmail() {
-    this.props.flux.getActions('auth').requestPasswordReset({
+    this.props.dispatch(requestPasswordReset({
       email: this.props.resetEmail,
-    });
+    }));
   },
 
 
@@ -65,7 +64,7 @@ let RequestPasswordResetSent = React.createClass({
         </div>
       </AuthContent>
     );
-  }
+  },
 
 });
 

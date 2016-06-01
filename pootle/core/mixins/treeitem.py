@@ -673,7 +673,8 @@ def update_cache_job(instance):
     """RQ job"""
     # The script prefix needs to be set here because the generated
     # URLs need to be aware of that and they are cached. Ideally
-    # Django should take care of setting this up, but it doesn't yet:
+    # Django should take care of setting this up, but it doesn't yet
+    # (fixed in Django 1.10):
     # https://code.djangoproject.com/ticket/16734
     script_name = (u'/' if settings.FORCE_SCRIPT_NAME is None
                         else force_unicode(settings.FORCE_SCRIPT_NAME))
@@ -681,7 +682,14 @@ def update_cache_job(instance):
     job = get_current_job()
     job_wrapper = JobWrapper(job.id, job.connection)
     keys, decrement = job_wrapper.get_job_params()
+
+    # close unusable and obsolete connections before and after the job
+    # Note: setting CONN_MAX_AGE parameter can have negative side-effects
+    # CONN_MAX_AGE value should be lower than DB wait_timeout
+    connection.close_if_unusable_or_obsolete()
     instance._update_cache_job(keys, decrement)
+    connection.close_if_unusable_or_obsolete()
+
     job_wrapper.clear_job_params()
 
 

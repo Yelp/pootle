@@ -6,15 +6,13 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 
 import AuthContent from './AuthContent';
 
 
-let AccountActivation = React.createClass({
+const AccountActivation = React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
@@ -61,7 +59,7 @@ let AccountActivation = React.createClass({
         </div>
       </AuthContent>
     );
-  }
+  },
 
 });
 

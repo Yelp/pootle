@@ -10,6 +10,7 @@
 from django.conf import settings
 from django.utils import translation
 
+from pootle.core.markup import get_markup_filter_name
 from pootle.core.utils.json import jsonify
 from pootle_language.models import Language
 from pootle_project.models import Project
@@ -40,13 +41,14 @@ def _get_social_auth_providers(request):
 
 def pootle_context(request):
     """Exposes settings to templates."""
-    #FIXME: maybe we should expose relevant settings only?
+    # FIXME: maybe we should expose relevant settings only?
     return {
         'settings': {
             'POOTLE_TITLE': settings.POOTLE_TITLE,
             'POOTLE_INSTANCE_ID': settings.POOTLE_INSTANCE_ID,
             'POOTLE_CONTACT_ENABLED': (settings.POOTLE_CONTACT_ENABLED and
                                        settings.POOTLE_CONTACT_EMAIL),
+            'POOTLE_MARKUP_FILTER': get_markup_filter_name(),
             'POOTLE_SIGNUP_ENABLED': settings.POOTLE_SIGNUP_ENABLED,
             'SCRIPT_NAME': settings.SCRIPT_NAME,
             'POOTLE_CACHE_TIMEOUT': settings.POOTLE_CACHE_TIMEOUT,

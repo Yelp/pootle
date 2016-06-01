@@ -7,6 +7,8 @@
 # or later license. See the LICENSE file for a copy of the license and the
 # AUTHORS file for copyright and authorship information.
 
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -20,7 +22,10 @@ from pootle_project.models import Project
 from staticpages.models import StaticPage as Announcement
 
 
-def initdb():
+logger = logging.getLogger(__name__)
+
+
+def initdb(create_projects=True):
     """Populate the database with default initial data.
 
     This creates the default database to get a working Pootle installation.
@@ -29,11 +34,42 @@ def initdb():
     create_essential_users()
     create_root_directories()
     create_template_languages()
-    create_terminology_project()
+    if create_projects:
+        create_terminology_project()
     create_pootle_permissions()
     create_pootle_permission_sets()
-    create_default_projects()
+    if create_projects:
+        create_default_projects()
     create_default_languages()
+
+
+def _create_object(model_klass, **criteria):
+    instance, created = model_klass.objects.get_or_create(**criteria)
+    if created:
+        logger.debug(
+            "Created %s: '%s'"
+            % (instance.__class__.__name__, instance))
+    else:
+        logger.debug(
+            "%s already exists - skipping: '%s'"
+            % (instance.__class__.__name__, instance))
+    return instance, created
+
+
+def _create_pootle_user(**criteria):
+    user, created = _create_object(get_user_model(), **criteria)
+    if created:
+        user.set_unusable_password()
+        user.save()
+    return user
+
+
+def _create_pootle_permission_set(permissions, **criteria):
+    permission_set, created = _create_object(PermissionSet, **criteria)
+    if created:
+        permission_set.positive_permissions = permissions
+        permission_set.save()
+    return permission_set
 
 
 def create_revision():
@@ -45,8 +81,6 @@ def create_essential_users():
 
     These users are required for Pootle's permission system.
     """
-    User = get_user_model()
-
     # The nobody user is used to represent an anonymous user in cases where
     # we need to associate model information with such a user. An example is
     # in the permission system: we need a way to store rights for anonymous
@@ -56,10 +90,7 @@ def create_essential_users():
         'full_name': u"any anonymous user",
         'is_active': True,
     }
-    nobody, created = User.objects.get_or_create(**criteria)
-    if created:
-        nobody.set_unusable_password()
-        nobody.save()
+    _create_pootle_user(**criteria)
 
     # The 'default' user represents any valid, non-anonymous user and is used
     # to associate information any such user. An example is in the permission
@@ -73,10 +104,7 @@ def create_essential_users():
         'full_name': u"any authenticated user",
         'is_active': True,
     }
-    default, created = User.objects.get_or_create(**criteria)
-    if created:
-        default.set_unusable_password()
-        default.save()
+    _create_pootle_user(**criteria)
 
     # The system user represents a system, and is used to
     # associate updates done by bulk commands as update_stores.
@@ -85,10 +113,7 @@ def create_essential_users():
         'full_name': u"system user",
         'is_active': True,
     }
-    system, created = User.objects.get_or_create(**criteria)
-    if created:
-        system.set_unusable_password()
-        system.save()
+    _create_pootle_user(**criteria)
 
 
 def create_pootle_permissions():
@@ -98,7 +123,8 @@ def create_pootle_permissions():
         'app_label': "pootle_app",
         'model': "directory",
     }
-    pootle_content_type, created = ContentType.objects.get_or_create(**args)
+
+    pootle_content_type, created = _create_object(ContentType, **args)
     pootle_content_type.name = 'pootle'
     pootle_content_type.save()
 
@@ -136,7 +162,7 @@ def create_pootle_permissions():
 
     for permission in permissions:
         criteria.update(permission)
-        obj, created = Permission.objects.get_or_create(**criteria)
+        _create_object(Permission, **criteria)
 
 
 def create_pootle_permission_sets():
@@ -159,16 +185,10 @@ def create_pootle_permission_sets():
         'user': nobody,
         'directory': Directory.objects.root,
     }
-    permission_set, created = PermissionSet.objects.get_or_create(**criteria)
-    if created:
-        permission_set.positive_permissions = [view, suggest]
-        permission_set.save()
+    _create_pootle_permission_set([view, suggest], **criteria)
 
     criteria['user'] = default
-    permission_set, created = PermissionSet.objects.get_or_create(**criteria)
-    if created:
-        permission_set.positive_permissions = [view, suggest, translate]
-        permission_set.save()
+    _create_pootle_permission_set([view, suggest, translate], **criteria)
 
     # Default permissions for templates language.
     # Override with no permissions for templates language.
@@ -176,16 +196,10 @@ def create_pootle_permission_sets():
         'user': nobody,
         'directory': Directory.objects.get(pootle_path="/templates/"),
     }
-    permission_set, created = PermissionSet.objects.get_or_create(**criteria)
-    if created:
-        permission_set.positive_permissions = []
-        permission_set.save()
+    _create_pootle_permission_set([], **criteria)
 
     criteria['user'] = default
-    permission_set, created = PermissionSet.objects.get_or_create(**criteria)
-    if created:
-        permission_set.positive_permissions = []
-        permission_set.save()
+    _create_pootle_permission_set([], **criteria)
 
 
 def require_english():
@@ -196,15 +210,14 @@ def require_english():
         'nplurals': 2,
         'pluralequation': "(n != 1)",
     }
-    en, created = Language.objects.get_or_create(**criteria)
+    en, created = _create_object(Language, **criteria)
     return en
 
 
 def create_root_directories():
     """Create the root Directory items."""
-    root, created = Directory.objects.get_or_create(name='')
-    projects, created = Directory.objects.get_or_create(name='projects',
-                                                        parent=root)
+    root, created = _create_object(Directory, **dict(name=""))
+    _create_object(Directory, **dict(name="projects", parent=root))
 
 
 def create_template_languages():
@@ -213,8 +226,7 @@ def create_template_languages():
     The 'templates' language is used to give users access to the untranslated
     template files.
     """
-    templates, created = Language.objects.get_or_create(code="templates",
-                                                        fullname=u'Templates')
+    _create_object(Language, **dict(code="templates", fullname="Templates"))
     require_english()
 
 
@@ -230,7 +242,7 @@ def create_terminology_project():
         'source_language': require_english(),
         'checkstyle': "terminology",
     }
-    terminology, created = Project.objects.get_or_create(**criteria)
+    _create_object(Project, **criteria)
 
 
 def create_default_projects():
@@ -251,8 +263,7 @@ def create_default_projects():
         'localfiletype': "po",
         'treestyle': "auto",
     }
-    tutorial = Project(**criteria)
-    tutorial.save()
+    tutorial, created = _create_object(Project, **criteria)
 
     criteria = {
         'active': True,
@@ -265,8 +276,7 @@ def create_default_projects():
                  'guide</a>.</div>'),
         'virtual_path': "announcements/projects/"+tutorial.code,
     }
-    ann = Announcement(**criteria)
-    ann.save()
+    _create_object(Announcement, **criteria)
 
 
 def create_default_languages():
@@ -289,6 +299,6 @@ def create_default_languages():
                 criteria['specialchars'] = tk_lang.specialchars
             except AttributeError:
                 pass
-            lang, created = Language.objects.get_or_create(**criteria)
+            _create_object(Language, **criteria)
         except:
             pass

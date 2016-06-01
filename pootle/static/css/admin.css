@@ -36,14 +36,28 @@ div#depchecks ul li.error
     color: #d54e21;
 }
 
-/* ADMIN GENERAL SETTINGS */
-
-textarea#id_DESCRIPTION
-{
-    width: 100%;
-}
 
 /* STATIC PAGES */
+
+
+.staticpages-edit
+{
+    margin: 1.5em 1em 0;
+    position: relative;
+}
+
+.staticpages-delete
+{
+    position: absolute;
+    right: 0;
+    z-index: 999;
+}
+
+html[dir="rtl"] .staticpages-edit
+{
+    right: auto;
+    left: 0;
+}
 
 .staticpages-form textarea
 {
@@ -114,6 +128,21 @@ html[dir="rtl"] .control-group .controls .radio-pre
     display: inline-block;
 }
 
+.controls-btn
+{
+    display: flex;
+}
+
+.controls-btn input
+{
+    align-self: center;
+}
+
+.controls-btn ul
+{
+    margin: 0 1.5em;
+}
+
 .control-group-separator
 {
     margin-left: 2em;
@@ -130,10 +159,11 @@ html[dir="rtl"] .control-group-separator
 
 td.code input
 {
-   width: 5em;
+    width: 5em;
 }
 
-td.fullname {
+td.fullname
+{
     width: 20%;
 }
 

@@ -6,12 +6,10 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import React from 'react';
 
 
-let ItemDelete = React.createClass({
+const ItemDelete = React.createClass({
 
   propTypes: {
     item: React.PropTypes.object.isRequired,
@@ -24,7 +22,7 @@ let ItemDelete = React.createClass({
 
   getInitialState() {
     return {
-      buttonDisabled: true
+      buttonDisabled: true,
     };
   },
 
@@ -53,7 +51,7 @@ let ItemDelete = React.createClass({
         <span className="helptext">{this.props.helpText}</span>}
       </div>
     );
-  }
+  },
 
 });
 

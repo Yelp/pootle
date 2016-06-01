@@ -6,8 +6,6 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import assign from 'object-assign';
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
@@ -15,11 +13,12 @@ import { PureRenderMixin } from 'react/addons';
 import { FormElement } from 'components/forms';
 import { FormMixin } from 'mixins/forms';
 
+import { gotoScreen, requestPasswordReset } from '../actions';
 import AuthContent from './AuthContent';
 import RequestPasswordResetProgress from './RequestPasswordResetProgress';
 
 
-let RequestPasswordResetForm = React.createClass({
+const RequestPasswordResetForm = React.createClass({
   mixins: [PureRenderMixin, FormMixin],
 
   propTypes: {
@@ -51,17 +50,17 @@ let RequestPasswordResetForm = React.createClass({
 
   handleSignIn(e) {
     e.preventDefault();
-    this.props.flux.getActions('auth').gotoScreen('signIn');
+    this.props.dispatch(gotoScreen('signIn'));
   },
 
   handleSignUp(e) {
     e.preventDefault();
-    this.props.flux.getActions('auth').gotoScreen('signUp');
+    this.props.dispatch(gotoScreen('signUp'));
   },
 
   handleFormSubmit(e) {
     e.preventDefault();
-    this.props.flux.getActions('auth').requestPasswordReset(this.state.formData);
+    this.props.dispatch(requestPasswordReset(this.state.formData));
   },
 
 

@@ -28,6 +28,7 @@
     PTL.settings = {
       CONTACT_ENABLED: {{ settings.POOTLE_CONTACT_ENABLED|yesno:'true, false' }},
       SIGNUP_ENABLED: {{ settings.POOTLE_SIGNUP_ENABLED|yesno:'true, false' }},
+      MARKUP_FILTER: '{{ settings.POOTLE_MARKUP_FILTER }}',
       SOCIAL_AUTH_PROVIDERS: {{ SOCIAL_AUTH_PROVIDERS|safe }},
     };
     </script>
@@ -175,7 +176,7 @@
     {% block scripts_extra %}{% endblock %}
     {% endblock scripts %}
     {% endblock body %}
-    <div class="js-auth" />{# Mount point for auth views #}
+    <div class="js-auth"></div>{# Mount point for auth views #}
     <div style="display: none;">{% csrf_token %}</div>
   </body>
 </html>

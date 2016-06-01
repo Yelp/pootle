@@ -18,10 +18,13 @@ build: docs mo assets
 	python setup.py sdist ${FORMATS} ${TAIL}
 
 assets:
+	npm --version
+	node --version
 	cd ${JS_DIR} && \
-	npm update && \
+	npm cache clear && \
+	npm install && \
 	cd ${CWD}
-	python manage.py webpack
+	python manage.py webpack --extra=--display-error-details
 	mkdir -p ${ASSETS_DIR}
 	python manage.py collectstatic --noinput --clear -i node_modules -i *.jsx ${TAIL}
 	python manage.py assets build ${TAIL}

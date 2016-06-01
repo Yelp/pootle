@@ -6,15 +6,13 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 
 import AuthContent from './AuthContent';
 
 
-let SocialAuthError = React.createClass({
+const SocialAuthError = React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
@@ -53,7 +51,7 @@ let SocialAuthError = React.createClass({
       }
       </AuthContent>
     );
-  }
+  },
 
 });
 

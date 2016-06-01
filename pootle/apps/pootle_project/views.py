@@ -11,16 +11,15 @@ import locale
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
+from django.utils.html import escape
 
-from pootle.core.browser import (make_language_item,
-                                 make_xlanguage_item,
-                                 make_project_list_item,
-                                 get_table_headings)
+from pootle.core.browser import (get_table_headings, make_language_item,
+                                 make_project_list_item, make_xlanguage_item)
 from pootle.core.decorators import (get_path_obj, get_resource,
                                     permission_required)
-from pootle.core.helpers import (get_export_view_context,
-                                 get_browser_context,
-                                 get_translation_context)
+from pootle.core.helpers import (get_export_view_context, get_browser_context,
+                                 get_sidebar_announcements_context,
+                                 get_translation_context, SIDEBAR_COOKIE_NAME)
 from pootle.core.url_helpers import split_pootle_path
 from pootle.core.utils.json import jsonify
 from pootle_app.views.admin import util
@@ -49,7 +48,12 @@ def browse(request, project, dir_path, filename):
         'items': items,
     }
 
-    ctx = get_browser_context(request)
+    ctx, cookie_data = get_sidebar_announcements_context(
+        request,
+        (project, ),
+    )
+
+    ctx.update(get_browser_context(request))
     ctx.update({
         'project': project,
         'table': table,
@@ -58,7 +62,12 @@ def browse(request, project, dir_path, filename):
         'browser_extends': 'projects/base.html',
     })
 
-    return render(request, 'browser/index.html', ctx)
+    response = render(request, 'browser/index.html', ctx)
+
+    if cookie_data:
+        response.set_cookie(SIDEBAR_COOKIE_NAME, cookie_data)
+
+    return response
 
 
 @get_path_obj
@@ -115,7 +124,7 @@ def project_admin(request, current_project):
     def generate_link(tp):
         path_args = split_pootle_path(tp.pootle_path)[:2]
         perms_url = reverse('pootle-tp-admin-permissions', args=path_args)
-        return u'<a href="%s">%s</a>' % (perms_url, tp.language)
+        return u'<a href="%s">%s</a>' % (perms_url, escape(tp.language))
 
     extra = (1 if current_project.get_template_translationproject() is not None
                else 0)

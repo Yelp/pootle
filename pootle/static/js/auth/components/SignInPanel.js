@@ -6,14 +6,12 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
-import 'jquery-cookie';
 import assign from 'object-assign';
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 
 import { Tabs, Tab } from 'components/Tabs';
+import cookie from 'utils/cookie';
 
 import AuthProgress from './AuthProgress';
 import SignInForm from './SignInForm';
@@ -23,7 +21,7 @@ import SocialSignInForm from './SocialSignInForm';
 const SIGNIN_TAB_COOKIE_NAME = 'pootle-auth-signin-tab';
 
 
-let SignInPanel = React.createClass({
+const SignInPanel = React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
@@ -38,7 +36,7 @@ let SignInPanel = React.createClass({
   /* Handlers */
 
   handleChange(index) {
-    $.cookie(SIGNIN_TAB_COOKIE_NAME, index);
+    cookie(SIGNIN_TAB_COOKIE_NAME, index, { path: '/' });
   },
 
 
@@ -55,7 +53,7 @@ let SignInPanel = React.createClass({
       );
     }
 
-    let initialTabIndex = parseInt($.cookie(SIGNIN_TAB_COOKIE_NAME), 10) || 0;
+    let initialTabIndex = parseInt(cookie(SIGNIN_TAB_COOKIE_NAME), 10) || 0;
 
     return (
       <Tabs onChange={this.handleChange} initialTab={initialTabIndex}>
@@ -67,7 +65,7 @@ let SignInPanel = React.createClass({
         </Tab>
       </Tabs>
     );
-  }
+  },
 
 });
 

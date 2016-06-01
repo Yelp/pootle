@@ -6,13 +6,11 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import cx from 'classnames';
 import React from 'react';
 
 
-let ItemTable = React.createClass({
+const ItemTable = React.createClass({
 
   propTypes: {
     fields: React.PropTypes.array.isRequired,
@@ -48,7 +46,7 @@ let ItemTable = React.createClass({
 });
 
 
-let ItemTableRow = React.createClass({
+const ItemTableRow = React.createClass({
 
   propTypes: {
     fields: React.PropTypes.array.isRequired,
@@ -83,7 +81,7 @@ let ItemTableRow = React.createClass({
         {this.props.fields.map(createColumn)}
       </tr>
     );
-  }
+  },
 
 });
 

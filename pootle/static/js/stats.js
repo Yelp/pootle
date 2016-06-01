@@ -8,19 +8,24 @@
 
 import $ from 'jquery';
 import React from 'react';
+import _ from 'underscore';
 
 import 'jquery-bidi';
 import 'jquery-utils';
 import assign from 'object-assign';
 import 'sorttable';
 
+import StatsAPI from 'api/StatsAPI';
 import LastUpdate from 'components/LastUpdate';
 import TimeSince from 'components/TimeSince';
 import UserEvent from 'components/UserEvent';
+import cookie from 'utils/cookie';
+
 import helpers from './helpers';
+import msg from './msg';
 
 
-const nicePercentage = function (part, total, noTotalDefault) {
+function nicePercentage(part, total, noTotalDefault) {
   const percentage = total ? part / total * 100 : noTotalDefault;
   if (99 < percentage && percentage < 100) {
     return 99;
@@ -29,7 +34,7 @@ const nicePercentage = function (part, total, noTotalDefault) {
     return 1;
   }
   return Math.round(percentage);
-};
+}
 
 
 function cssId(id) {
@@ -40,6 +45,14 @@ function cssId(id) {
 const stats = {
 
   init(options) {
+    if (cookie('finished')) {
+      msg.show({
+        text: gettext('Congratulations! You have completed this task!'),
+        level: 'success',
+      });
+      cookie('finished', null, { path: '/' });
+    }
+
     this.retries = 0;
 
     const isExpanded = (options.isInitiallyExpanded ||
@@ -93,12 +106,11 @@ const stats = {
   },
 
   updateProgressbar($td, item) {
-    var translated = nicePercentage(item.translated, item.total, 100),
-        fuzzy = nicePercentage(item.fuzzy, item.total, 0),
-        untranslated = 100 - translated - fuzzy,
-        $legend = $('<span>').html($td.find('script').text());
-
-    untranslated = untranslated < 0 ? 0 : untranslated;
+    const translated = nicePercentage(item.translated, item.total, 100);
+    const fuzzy = nicePercentage(item.fuzzy, item.total, 0);
+    const untranslatedCount = 100 - translated - fuzzy;
+    const untranslated = untranslatedCount < 0 ? 0 : untranslatedCount;
+    const $legend = $('<span>').html($td.find('script').text());
 
     $legend.find('.value.translated').text(translated);
     $legend.find('.value.fuzzy').text(fuzzy);
@@ -211,33 +223,34 @@ const stats = {
     $td.parent().toggleClass('dirty', item.is_dirty);
     this.updateItemStats($td, item.total);
 
-    var isFullRatio = item.total === 0 || item.total === null,
-        ratio = isFullRatio ? 1 : item.translated / item.total;
-    $table.find('#translated-ratio-' + code).text(ratio);
+    const isFullRatio = item.total === 0 || item.total === null;
+    const ratio = isFullRatio ? 1 : item.translated / item.total;
+    $table.find(`#translated-ratio-${code}`).text(ratio);
 
-    $td = $table.find('#need-translation-' + code);
-    var needTranslationCount = item.total !== null ?
-      item.total - item.translated : null;
+    $td = $table.find(`#need-translation-${code}`);
+    const needTranslationCount = (item.total !== null ?
+                                  item.total - item.translated :
+                                  null);
     this.updateItemStats($td, needTranslationCount);
 
-    $td = $table.find('#suggestions-' + code);
+    $td = $table.find(`#suggestions-${code}`);
     this.updateItemStats($td, item.suggestions);
 
-    $td = $table.find('#progressbar-' + code);
+    $td = $table.find(`#progressbar-${code}`);
     this.updateProgressbar($td, item);
 
     if (item.lastaction) {
-      $td = $table.find('#last-activity-' + code);
+      $td = $table.find(`#last-activity-${code}`);
       $td.removeClass('not-inited');
       this.renderLastEvent($td[0], item.lastaction);
       $td.attr('sorttable_customkey', now - item.lastaction.mtime);
     }
 
-    $td = $table.find('#critical-' + code);
+    $td = $table.find(`#critical-${code}`);
     this.updateItemStats($td, item.critical);
 
     if (item.lastupdated) {
-      $td = $table.find('#last-updated-' + code);
+      $td = $table.find(`#last-updated-${code}`);
       $td.removeClass('not-inited');
       this.renderLastUpdatedTime($td[0], item.lastupdated);
       $td.attr('sorttable_customkey', now - item.lastupdated.creation_time);
@@ -247,10 +260,10 @@ const stats = {
   updateStatsUI() {
     const { data } = this.state;
 
-    var $table = $('#content table.stats'),
-        $vfoldersTable = $('#content .vfolders table.stats'),
-        dirtySelector = '#top-stats, #translate-actions, #autorefresh-notice',
-        now = parseInt(Date.now() / 1000, 10);
+    const $table = $('#content table.stats');
+    const $vfoldersTable = $('#content .vfolders table.stats');
+    const dirtySelector = '#top-stats, #translate-actions, #autorefresh-notice';
+    const now = parseInt(Date.now() / 1000, 10);
 
     $(dirtySelector).toggleClass('dirty', !!data.is_dirty);
     if (!!data.is_dirty) {
@@ -272,29 +285,29 @@ const stats = {
                                 data.total, data.translated, 100);
     this.updateTranslationStats($('#stats-fuzzy'),
                                 data.total, data.fuzzy, 0);
-    var untranslated = data.total === null ? null :
-      data.total - data.translated - data.fuzzy;
+
+    const untranslated = (data.total === null ?
+                          null :
+                          data.total - data.translated - data.fuzzy);
     this.updateTranslationStats($('#stats-untranslated'),
                                 data.total, untranslated, 0);
     this.updateLastUpdates(data);
 
     if ($table.length) {
       // this is a directory that contains subitems
-      var name, item, code, $td;
-
-      for (name in data.children) {
-        item = data.children[name];
-        code = cssId(name);
-        $td = $table.find('#total-words-' + code);
+      for (let name in data.children) {
+        const item = data.children[name];
+        const code = cssId(name);
+        const $td = $table.find(`#total-words-${_.escape(code)}`);
 
         this.processTableItem(item, code, $table, $td, now);
       }
 
       if ($vfoldersTable.length) {
-        for (name in data.vfolders) {
-          item = data.vfolders[name];
-          code = cssId(name);
-          $td = $vfoldersTable.find('#total-words-' + code);
+        for (let name in data.vfolders) {
+          const item = data.vfolders[name];
+          const code = cssId(name);
+          const $td = $vfoldersTable.find(`#total-words-${_.escape(code)}`);
 
           // Display only the virtual folders that must be displayed.
           if (this.isAdmin || item.isVisible) {
@@ -319,10 +332,9 @@ const stats = {
       }
 
       // Sort columns based on previously-made selections
-      var sortCookie = $table.data('sort-cookie'),
-          columnSort = sorttable.getSortCookie(sortCookie);
+      const columnSort = sorttable.getSortCookie($table.data('sort-cookie'));
       if (columnSort !== null) {
-        var $th = $('#' + columnSort.columnId);
+        const $th = $('#' + columnSort.columnId);
         $th.removeClass('sorttable_sorted sorttable_sorted_reverse');
         setTimeout(function () {
           $th.click();
@@ -350,34 +362,28 @@ const stats = {
   },
 
   updateDirtyBackoffCounter() {
-    var noticeStr = ngettext('%s second', '%s seconds', this.dirtyBackoff);
-    noticeStr = interpolate(noticeStr, [this.dirtyBackoff], false);
+    const noticeStr = interpolate(
+      ngettext('%s second', '%s seconds', this.dirtyBackoff),
+      [this.dirtyBackoff],
+      false
+    );
     $('#autorefresh-notice strong').text(noticeStr);
   },
 
-  load(url, data) {
+  load(methodName) {
     $('body').spin();
-    return (
-      $.ajax({
-        url,
-        data,
-        dataType: 'json',
-      }).always(() => $('body').spin(false))
-    );
+    return StatsAPI[methodName](this.pootlePath)
+      .always(() => $('body').spin(false));
   },
 
   loadStats() {
-    return (
-      this.load(l('/xhr/stats/'), {path: this.pootlePath})
-          .done((data) => this.setState({data}))
-    );
+    return this.load('getStats')
+      .done((data) => this.setState({ data }));
   },
 
   loadChecks() {
-    return (
-      this.load(l('/xhr/stats/checks'), {path: this.pootlePath})
-          .done((data) => this.setState({isExpanded: true, checksData: data}))
-    );
+    return this.load('getChecks')
+      .done((data) => this.setState({ isExpanded: true, checksData: data }));
   },
 
   /* Path summary */
@@ -407,12 +413,12 @@ const stats = {
 
     if (data !== null && Object.keys(data).length) {
       this.$extraDetails.find('.js-checks').each(function (e) {
-        var empty = true,
-            $cat = $(this);
+        const $cat = $(this);
+        let empty = true;
 
         $cat.find('.js-check').each(function (e) {
-          var $check = $(this),
-              code = $(this).data('code');
+          const $check = $(this);
+          const code = $(this).data('code');
           if (code in data) {
             empty = false;
             $check.show();

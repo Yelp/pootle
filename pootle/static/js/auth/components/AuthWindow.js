@@ -6,14 +6,12 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import React from 'react';
 
 import { Modal } from 'components/lightbox';
 
 
-let AuthWindow = React.createClass({
+const AuthWindow = React.createClass({
   propTypes: {
     canContact: React.PropTypes.bool.isRequired,
   },
@@ -39,7 +37,7 @@ let AuthWindow = React.createClass({
         {...this.props}
       />
     );
-  }
+  },
 
 });
 

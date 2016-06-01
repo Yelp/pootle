@@ -143,6 +143,23 @@ recalculate only the ``date_format`` quality checks, run:
     $ pootle calculate_checks --check=date_format
 
 
+.. django-admin:: clear_stats
+
+clear_stats
+^^^^^^^^^^^
+
+.. versionadded:: 2.7
+
+Clear stats cache data.
+
+Make use of :djadmin:`clear_stats` in cases where you want to remove all stats
+data.  Such a case may be where you want to recalculate stats after a change
+to checks or wordcount calculations.  While it should be fine to run
+:djadmin:`refresh_stats` or :djadmin:`calculate_checks`, by first running
+:djadmin:`clear_stats` you can be sure that the stats are calculated from
+scratch.
+
+
 .. django-admin:: refresh_scores
 
 refresh_scores
@@ -377,6 +394,7 @@ Translation Memory
 These commands allow you to setup and manage :doc:`Translation Memory
 </features/translation_memory>`.
 
+
 .. django-admin:: update_tmserver
 
 update_tmserver
@@ -384,17 +402,90 @@ update_tmserver
 
 .. versionadded:: 2.7
 
-Updates the ``default`` server in :setting:`POOTLE_TM_SERVER`.  The command
+.. versionchanged:: 2.7.3 Renamed :option:`--overwrite` to :option:`--refresh`.
+   Disabled projects' translations are no longer added by default. It is also
+   possible to import translations from files.
+
+
+Updates the ``local`` server in :setting:`POOTLE_TM_SERVER`.  The command
 reads translations from the current Pootle install and builds the TM resources
 in the TM server.
 
-By default the command will only add new translations to the server.  To
-rebuild the server from scratch use :option:`--rebuild`, this will completely
-remove the TM and rebuild it.  To ensure that the TM server remains available
-when you rebuild you can add :option:`--overwrite`.
+If no options are provided, the command will only add new translations to the
+server. Use :option:`--refresh` to also update existing translations that have
+been changed, besides adding any new translation. To completely remove the TM
+and rebuild it adding all existing translations use :option:`--rebuild`.
+
+If no specific TM server is specified using :option:`--tm`, then the default
+``local`` TM will be used. If the specified TM server doesn't exist it will
+be automatically created for you.
+
+By default translations from disabled projects are not added to the TM, but
+this can be changed by specifying :option:`--include-disabled-projects`.
 
 To see how many units will be loaded into the server use :option:`--dry-run`,
-no actual data will be loaded.
+no actual data will be loaded or deleted (the TM will be left unchanged):
+
+.. code-block:: bash
+
+    $ pootle update_tmserver --dry-run
+    $ pootle update_tmserver --refresh --dry-run
+    $ pootle update_tmserver --rebuild --dry-run
+
+
+This command also allows to read translations from files and build the TM
+resources in the external TM server. In order to do so it is mandatory to
+provide the :option:`--tm` and :option:`--display-name` options, along with
+some files to import.
+
+The display name is a label used to group translations within a TM. A given TM
+can host translations for several display names. The display name can be used
+to specify the name of the project from which the translations originate. The
+display name will be shown on TM matches in the translation editor. To specify
+a name use :option:`--display-name`:
+
+.. code-block:: bash
+
+   (env) $ pootle update_tmserver --tm=libreoffice --display-name="LibreOffice 4.3 UI" TM_LibreOffice_4.3.gl.tmx
+
+
+By default the command will only add new translations to the server. To rebuild
+the server from scratch use :option:`--rebuild` to completely remove the TM and
+rebuild it before importing the translations:
+
+.. code-block:: bash
+
+   (env) $ pootle update_tmserver --rebuild --tm=mozilla --display-name="Foo 1.7" foo.po
+
+
+Option :option:`--refresh` doesn't apply when adding translations from files
+on disk.
+
+To see how many units will be loaded into the server use :option:`--dry-run`,
+no actual data will be loaded:
+
+.. code-block:: bash
+
+   (env) $ pootle update_tmserver --dry-run --tm=mozilla --display-name="Foo 1.7" foo.po
+   175045 translations to index
+
+
+This command is capable of importing translations in multiple formats from
+several files and directories at once:
+
+.. code-block:: bash
+
+   (env) $ pootle update_tmserver --tm=mozilla --display-name="Foo 1.7" bar.tmx foo.xliff fr/
+
+
+Use :option:`--target-language` to specify the target language ISO code for the
+imported translations in case it is not possible to guess it from the
+translation files or if the code is incorrect:
+
+.. code-block:: bash
+
+   (env) $ pootle update_tmserver --target-language=af --tm=mozilla --display-name="Foo 1.7" foo.po bar.tmx
+
 
 .. _commands#vfolders:
 
@@ -472,6 +563,15 @@ counter is older than on Pootle, that is someone has translated while the file
 was offline, then it will be rejected.  Otherwise the translations in the file
 are accepted.
 
+Available options:
+
+:option:`--user`
+  .. versionadded:: 2.7.3
+
+  Import file(s) as given user. The user with the provided username must exist.
+
+  Default: ``system``.
+
 
 .. _commands#manually_installing_pootle:
 
@@ -532,43 +632,29 @@ Available options:
   Not used with sqlite.
 
 
-.. _commands#migrate:
-
-migrate
-^^^^^^^
-
-.. versionchanged:: 2.7
-
-
-.. note::
-
-  Since the addition of the :command:`setup` management command it is not
-  necessary to directly run this command. Please refer to the :ref:`Upgrading
-  <upgrading>` or :ref:`Installation <installation>` instructions to see how to
-  run the :command:`setup` management command in those scenarios.
-
-
-This is Django's :djadmin:`django:migrate` command, which syncs the state of
-models with the DB and applies migrations for them.
-
-
 .. django-admin:: initdb
 
 initdb
 ^^^^^^
 
-Initialises a new Pootle install.
+Initializes a new Pootle install.
 
-This is part an optional part of Pootle's install process, it creates the
-default *admin* user, populates the language table with several languages with
-their correct fields, initializes several terminology projects, and creates the
-tutorial project.
+This is an optional part of Pootle's install process, it creates the default
+*admin* user, populates the language table with several languages, initializes
+the terminology project, and creates the tutorial project among other tasks.
 
-:djadmin:`initdb` can only be run after :ref:`commands#migrate`.
+:djadmin:`initdb` can only be run after :djadmin:`django:migrate`.
 
-.. note:: :djadmin:`initdb` will not import translations into the database, so
-   the first visit to Pootle after :djadmin:`initdb` will be very slow. **It is
-   best to run** :djadmin:`refresh_stats` **immediately after initdb**.
+:djadmin:`initdb` accepts the following option:
+
+.. versionadded:: 2.7.3
+
+:option:`--no-projects`:
+   Don't create the default ``terminology`` and ``tutorial`` projects.
+
+.. note:: :djadmin:`initdb` will import translations into the database, so
+   can be slow to run. You should have an ``rqworker`` running or run with
+   the :option:`--no-rq`.
 
 
 .. _commands#collectstatic:

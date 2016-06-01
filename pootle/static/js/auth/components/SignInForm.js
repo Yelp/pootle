@@ -6,16 +6,15 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import assign from 'object-assign';
 import React from 'react';
 
+import { gotoScreen, signIn } from '../actions';
 import { FormElement } from 'components/forms';
 import { FormMixin } from 'mixins/forms';
 
 
-let SignInForm = React.createClass({
+const SignInForm = React.createClass({
   mixins: [FormMixin],
 
   propTypes: {
@@ -49,18 +48,18 @@ let SignInForm = React.createClass({
 
   handleRequestPasswordReset(e) {
     e.preventDefault();
-    this.props.flux.getActions('auth').gotoScreen('requestPasswordReset');
+    this.props.dispatch(gotoScreen('requestPasswordReset'));
   },
 
   handleSignUp(e) {
     e.preventDefault();
-    this.props.flux.getActions('auth').gotoScreen('signUp');
+    this.props.dispatch(gotoScreen('signUp'));
   },
 
   handleFormSubmit(e) {
     e.preventDefault();
     let nextURL = window.location.pathname + window.location.hash;
-    this.props.flux.getActions('auth').signIn(this.state.formData, nextURL);
+    this.props.dispatch(signIn(this.state.formData, nextURL));
   },
 
 
@@ -128,7 +127,8 @@ let SignInForm = React.createClass({
         </div>
       </form>
     );
-  }
+  },
+
 });
 
 

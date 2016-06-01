@@ -16,7 +16,7 @@ from django.utils.translation import ugettext as _
 TTK_MINIMUM_REQUIRED_VERSION = (1, 13, 0)
 
 # Minimum Django version required for Pootle to run.
-DJANGO_MINIMUM_REQUIRED_VERSION = (1, 7, 10)
+DJANGO_MINIMUM_REQUIRED_VERSION = (1, 7, 11)
 
 # Minimum lxml version required for Pootle to run.
 LXML_MINIMUM_REQUIRED_VERSION = (2, 2, 2, 0)
@@ -80,7 +80,7 @@ def check_library_versions(app_configs=None, **kwargs):
     if django_version < DJANGO_MINIMUM_REQUIRED_VERSION:
         errors.append(checks.Critical(
             _("Your version of Django is too old."),
-            hint=_("Try pip install --upgrade 'Django==%s'" %
+            hint=_("Try pip install --upgrade 'Django==%s'",
                    _version_to_string(DJANGO_MINIMUM_REQUIRED_VERSION)),
             id="pootle.C002",
         ))
@@ -114,8 +114,8 @@ def check_redis(app_configs=None, **kwargs):
         workers = Worker.all(queue.connection)
     except Exception as e:
         conn_settings = queue.connection.connection_pool.connection_kwargs
-        errors.append(checks.Critical(_("Could not connect to Redis (%s)") % (e),
-            hint=_("Make sure Redis is running on %(host)s:%(port)s") % (conn_settings),
+        errors.append(checks.Critical(_("Could not connect to Redis (%s)", e),
+            hint=_("Make sure Redis is running on %(host)s:%(port)s") % conn_settings,
             id="pootle.C001",
         ))
     else:
@@ -126,7 +126,7 @@ def check_redis(app_configs=None, **kwargs):
             errors.append(checks.Critical(
                 _("Your version of Redis is too old."),
                 hint=_("Update your system's Redis server package to at least "
-                       "version %s" % str(REDIS_MINIMUM_REQUIRED_VERSION)),
+                       "version %s", str(REDIS_MINIMUM_REQUIRED_VERSION)),
                 id="pootle.C007",
             ))
 
@@ -256,10 +256,75 @@ def check_settings(app_configs=None, **kwargs):
             except ImportError:
                 errors.append(checks.Warning(
                     _("POOTLE_MARKUP_FILTER is set to '%s' markup, but the "
-                      "package that provides can't be found." % markup_filter),
+                      "package that provides can't be found.", markup_filter),
                     hint=_("Install the package or change "
                            "POOTLE_MARKUP_FILTER."),
                     id="pootle.W015",
+                ))
+
+    if settings.POOTLE_TM_SERVER:
+        tm_indexes = []
+
+        for server in settings.POOTLE_TM_SERVER:
+            if 'INDEX_NAME' not in settings.POOTLE_TM_SERVER[server]:
+                errors.append(checks.Critical(
+                    _("POOTLE_TM_SERVER['%s'] has no INDEX_NAME.", server),
+                    hint=_("Set an INDEX_NAME for POOTLE_TM_SERVER['%s'].",
+                           server),
+                    id="pootle.C008",
+                ))
+            elif settings.POOTLE_TM_SERVER[server]['INDEX_NAME'] in tm_indexes:
+                errors.append(checks.Critical(
+                    _("Duplicate '%s' INDEX_NAME in POOTLE_TM_SERVER.",
+                      settings.POOTLE_TM_SERVER[server]['INDEX_NAME']),
+                    hint=_("Set different INDEX_NAME for all servers in "
+                           "POOTLE_TM_SERVER."),
+                    id="pootle.C009",
+                ))
+            else:
+                tm_indexes.append(settings.POOTLE_TM_SERVER[server]['INDEX_NAME'])
+
+            if 'ENGINE' not in settings.POOTLE_TM_SERVER[server]:
+                errors.append(checks.Critical(
+                    _("POOTLE_TM_SERVER['%s'] has no ENGINE.", server),
+                    hint=_("Set a ENGINE for POOTLE_TM_SERVER['%s'].",
+                           server),
+                    id="pootle.C010",
+                ))
+
+            if 'HOST' not in settings.POOTLE_TM_SERVER[server]:
+                errors.append(checks.Critical(
+                    _("POOTLE_TM_SERVER['%s'] has no HOST.", server),
+                    hint=_("Set a HOST for POOTLE_TM_SERVER['%s'].",
+                           server),
+                    id="pootle.C011",
+                ))
+
+            if 'PORT' not in settings.POOTLE_TM_SERVER[server]:
+                errors.append(checks.Critical(
+                    _("POOTLE_TM_SERVER['%s'] has no PORT.", server),
+                    hint=_("Set a PORT for POOTLE_TM_SERVER['%s'].",
+                           server),
+                    id="pootle.C012",
+                ))
+
+            if 'MIN_SCORE' not in settings.POOTLE_TM_SERVER[server]:
+                errors.append(checks.Critical(
+                    _("POOTLE_TM_SERVER['%s'] has no MIN_SCORE.", server),
+                    hint=_("Set a MIN_SCORE for POOTLE_TM_SERVER['%s'].",
+                           server),
+                    id="pootle.C013",
+                ))
+
+            if ('WEIGHT' in settings.POOTLE_TM_SERVER[server] and
+                not (0.0 <= settings.POOTLE_TM_SERVER[server]['WEIGHT'] <= 1.0)):
+
+                errors.append(checks.Warning(
+                    _("POOTLE_TM_SERVER['%s'] has a WEIGHT less than 0.0 or "
+                      "greater than 1.0", server),
+                    hint=_("Set a WEIGHT between 0.0 and 1.0 (both included) "
+                           "for POOTLE_TM_SERVER['%s'].", server),
+                    id="pootle.W019",
                 ))
 
     return errors

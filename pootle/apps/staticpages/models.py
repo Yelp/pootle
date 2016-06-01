@@ -16,10 +16,14 @@ from django.core.urlresolvers import reverse
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from pootle.core.markup import get_markup_filter_name, MarkupField
+from pootle.core.markup import get_markup_filter_display_name, MarkupField
 from pootle.core.mixins import DirtyFieldsMixin
 
 from .managers import PageManager
+
+
+ANN_TYPE = u'announcements'
+ANN_VPATH = ANN_TYPE + u'/'
 
 
 class AbstractPage(DirtyFieldsMixin, models.Model):
@@ -42,13 +46,12 @@ class AbstractPage(DirtyFieldsMixin, models.Model):
         # Translators: Content that will be used to display this static page
         _("Display Content"),
         blank=True,
-        help_text=_('Allowed markup: %s', get_markup_filter_name()),
+        help_text=_('Allowed markup: %s', get_markup_filter_display_name()),
     )
     url = models.URLField(
         _("Redirect to URL"),
         blank=True,
-        help_text=_('If set, any references to this page will redirect to this'
-                    ' URL'),
+        help_text=_('If set, this page will redirect to this URL'),
     )
     modified_on = models.DateTimeField(
         default=now,
@@ -123,10 +126,19 @@ class StaticPage(AbstractPage):
 
     display_name = _('Regular Page')
 
+    @classmethod
+    def get_announcement_for(cls, pootle_path, user=None):
+        """Return the announcement for the specified pootle path and user."""
+        virtual_path = ANN_VPATH + pootle_path.strip('/')
+        try:
+            return cls.objects.live(user).get(virtual_path=virtual_path)
+        except StaticPage.DoesNotExist:
+            return None
+
     def get_edit_url(self):
         page_type = 'static'
-        if self.virtual_path.startswith('announcements/'):
-            page_type = 'announcements'
+        if self.virtual_path.startswith(ANN_VPATH):
+            page_type = ANN_TYPE
         return reverse('pootle-staticpages-edit', args=[page_type, self.pk])
 
 

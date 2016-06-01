@@ -37,14 +37,10 @@ var resolve = {
 
     'backbone-move': __dirname + '/vendor/backbone/backbone.move.js',
     'backbone-safesync': __dirname + '/vendor/backbone/backbone.safesync.js',
-    // FIXME: get rid of bb-router
-    'backbone-queryparams': __dirname + '/vendor/backbone/backbone.queryparams.js',
-    'backbone-queryparams-shim': __dirname + '/vendor/backbone/backbone.queryparams-1.1-shim.js',
     'backbone-relational': __dirname + '/vendor/backbone/backbone-relational.js',
 
     'jquery-bidi': __dirname + '/vendor/jquery/jquery.bidi.js',
     'jquery-caret': __dirname + '/vendor/jquery/jquery.caret.js',
-    'jquery-cookie': __dirname + '/vendor/jquery/jquery.cookie.js',
     'jquery-easing': __dirname + '/vendor/jquery/jquery.easing.js',
     'jquery-flot': __dirname + '/vendor/jquery/jquery.flot.js',
     'jquery-flot-stack': __dirname + '/vendor/jquery/jquery.flot.stack.js',
@@ -59,8 +55,6 @@ var resolve = {
     'jquery-tipsy': __dirname + '/vendor/jquery/jquery.tipsy.js',
     'jquery-utils': __dirname + '/vendor/jquery/jquery.utils.js',
 
-    'diff-match-patch': __dirname + '/vendor/diff_match_patch.js', // FIXME: use npm module
-    iso8601: __dirname + '/vendor/iso8601.js', // FIXME: use npm module
     levenshtein: __dirname + '/vendor/levenshtein.js', // FIXME: use npm module
     moment: __dirname + '/vendor/moment.js', // FIXME: use npm module
     odometer: __dirname + '/vendor/odometer.js', // FIXME: use npm module
@@ -117,6 +111,10 @@ plugins.push.apply(plugins, [
     'process.env': {NODE_ENV: JSON.stringify(env)}
   }),
   new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+  new webpack.ContextReplacementPlugin(
+    /codemirror[\/\\]mode$/,
+    /htmlmixed|markdown|rst|textile/
+  ),
   new webpack.ProvidePlugin({
     'window.Backbone': 'backbone',
   }),
@@ -131,12 +129,21 @@ var config = {
   entry: entries,
   output: {
     path: __dirname,
+    publicPath: process.env.WEBPACK_PUBLIC_PATH,
     filename: './[name]/app.bundle.js'
   },
   module: {
     loaders: [
-      { test: /\.css/, loader: 'style-loader!css-loader', exclude: /node_modules/ },
-      { test: /\.jsx?$/, loader: 'babel-loader', exclude: /node_modules|vendor/}
+      { test: /\.css/, loader: 'style-loader!css-loader' },
+      {
+        test: /\.jsx?$/,
+        loader: 'babel-loader',
+        query: {
+          cacheDirectory: true,
+          presets: ['es2015', 'react'],
+        },
+        exclude: /node_modules|vendor/,
+      }
     ]
   },
   resolve: resolve,

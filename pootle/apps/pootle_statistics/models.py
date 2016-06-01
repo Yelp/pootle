@@ -290,8 +290,8 @@ class Submission(models.Model):
             "mtime": int(dateformat.format(self.creation_time, 'U')),
         })
 
-        #TODO Fix bug 3011 and remove the following code related
-        # to TranslationActionTypes.
+        # TODO Fix bug 3011 and remove the following code related to
+        # TranslationActionTypes.
 
         if self.type in SubmissionTypes.EDIT_TYPES:
             translation_action_type = None
@@ -349,8 +349,8 @@ class Submission(models.Model):
                                                      sugg_user.display_name)
         return {
             SubmissionTypes.SUGG_ADD: _(u'Added suggestion'),
-            SubmissionTypes.SUGG_ACCEPT: _(u'Accepted suggestion from %s' % author),
-            SubmissionTypes.SUGG_REJECT: _(u'Rejected suggestion from %s' % author),
+            SubmissionTypes.SUGG_ACCEPT: _(u'Accepted suggestion from %s', author),
+            SubmissionTypes.SUGG_REJECT: _(u'Rejected suggestion from %s', author),
         }.get(self.type, None)
 
     def save(self, *args, **kwargs):
@@ -638,13 +638,19 @@ class ScoreLog(models.Model):
         """
         ns = self.wordcount
         s = self.get_similarity()
-        translated_words = ns * (1 - s)
-        if self.rate != 0:
-            translated_words += self.review_rate * ns * s / self.rate
-        else:
-            translated_words += REVIEW_COEF * ns * s / (EDIT_COEF + REVIEW_COEF)
 
-        translated_words = round(translated_words, 2)
+        rate = EDIT_COEF + REVIEW_COEF
+        review_rate = REVIEW_COEF
+        if self.rate != 0:
+            rate = self.rate
+            review_rate = self.review_rate
+        raw_rate = rate - review_rate
+
+        # if similarity is zero then translated_words would be
+        # ns * (1 - s), that equals sum of raw_translation and
+        # review costs divided by translation_rate
+        translated_words = (ns * (1 - s) * raw_rate + ns * review_rate) / rate
+        translated_words = round(translated_words, 4)
         reviewed_words = ns
 
         def get_sugg_reviewed_accepted():

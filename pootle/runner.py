@@ -16,8 +16,6 @@ from django.core import management
 
 import syspath_override
 
-from .core.utils.redis_rq import rq_workers_are_running
-
 
 #: Length for the generated :setting:`SECRET_KEY`
 KEY_LENGTH = 50
@@ -162,6 +160,8 @@ def init_command(parser, settings_template, args):
 def set_sync_mode(noinput=False):
     """Sets ASYNC = False on all redis worker queues
     """
+    from .core.utils.redis_rq import rq_workers_are_running
+
     if rq_workers_are_running():
         redis_warning = ("\nYou currently have RQ workers running.\n\n"
                          "Running in synchronous mode may conflict with jobs "
@@ -235,14 +235,24 @@ def run_app(project, default_settings_path, settings_template,
     args, remainder = parser.parse_known_args(sys.argv[1:])
 
     # Add pootle args
-    parser.add_argument("--config",
-                        default=default_settings_path,
-                        help=u"Use the specified configuration file.")
-    parser.add_argument("--noinput", action="store_true", default=False,
-                        help=u"Never prompt for input")
-    parser.add_argument("--no-rq", action="store_true", default=False,
-                        help=(u"Run all jobs in a single process, without "
-                              "using rq workers"))
+    parser.add_argument(
+        "--config",
+        default=default_settings_path,
+        help=u"Use the specified configuration file.",
+    )
+    parser.add_argument(
+        "--noinput",
+        action="store_true",
+        default=False,
+        help=u"Never prompt for input",
+    )
+    parser.add_argument(
+        "--no-rq",
+        action="store_true",
+        default=False,
+        help=(u"Run all jobs in a single process, without "
+              "using rq workers"),
+    )
 
     # Parse the init command by hand to prevent raising a SystemExit while
     # parsing

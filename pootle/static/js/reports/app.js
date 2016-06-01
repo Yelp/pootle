@@ -378,7 +378,6 @@ PTL.reports = {
       url: 'activity',
       data: reqData,
       dataType: 'json',
-      async: true,
       success: function (data) {
         PTL.reports.serverTime = data.meta.now;
         PTL.reports.now = moment(data.meta.now, 'YYYY-MM-DD HH:mm:ss');
@@ -410,6 +409,18 @@ PTL.reports = {
             paidTaskTypes: paidTaskTypes,
           };
           $('#reports-paid-tasks').html(PTL.reports.tmpl.paid_tasks(ctx));
+          ctx.data.total = 0;
+          for (let i in ctx.data.summary) {
+            let row = ctx.data.summary[i];
+            row.subTotal = Math.round(row.amount) * row.rate;
+            row.subTotal = +row.subTotal.toFixed(2);
+            ctx.data.total += row.subTotal;
+          }
+          for (let i in ctx.data.paid_task_summary) {
+            let row = ctx.data.paid_task_summary[i];
+            row.subTotal = row.amount * row.rate;
+            ctx.data.total += row.subTotal;
+          }
           $('#reports-summary').html(PTL.reports.tmpl.summary(ctx));
         }
 

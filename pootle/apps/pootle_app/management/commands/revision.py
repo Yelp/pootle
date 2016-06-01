@@ -20,14 +20,19 @@ from pootle.core.models import Revision
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
-        make_option('--restore', action='store_true', default=False, dest='restore',
-                    help='Restore the current revision number from the DB.'),
+        make_option(
+            '--restore',
+            action='store_true',
+            default=False,
+            dest='restore',
+            help='Restore the current revision number from the DB.',
+        ),
     )
 
     help = "Print the number of the current revision."
 
     def handle_noargs(self, **options):
-        if options.get('restore'):
+        if options['restore']:
             from pootle_store.models import Unit
             Revision.set(Unit.max_revision())
 

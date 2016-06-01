@@ -6,8 +6,6 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import Backbone from 'backbone';
 import React from 'react';
 import _ from 'underscore';
@@ -15,7 +13,7 @@ import _ from 'underscore';
 import msg from '../../msg';
 
 
-let AdminController = React.createClass({
+const AdminController = React.createClass({
 
   /* Lifecycle */
 
@@ -30,17 +28,18 @@ let AdminController = React.createClass({
 
   setupRoutes(router) {
 
-    router.on('route:main', function (qs) {
-      var searchQuery = '';
-      qs !== undefined && (searchQuery = qs.q);
+    router.on('route:main', (searchQuery) => {
+      if (searchQuery === undefined || searchQuery === null) {
+        searchQuery = '';
+      }
       this.handleSearch(searchQuery);
-    }.bind(this));
+    });
 
-    router.on('route:edit', function (id, qs) {
+    router.on('route:edit', (id, qs) => {
       var Model = this.props.adminModule.model;
       var item = new Model({id: id});
       this.handleSelectItem(item);
-    }.bind(this));
+    });
   },
 
   componentWillMount() {
@@ -49,7 +48,10 @@ let AdminController = React.createClass({
   },
 
   componentWillUpdate(nextProps, nextState) {
-    this.handleURL(nextState);
+    if (nextState.searchQuery !== this.state.searchQuery ||
+        nextState.selectedItem !== this.state.selectedItem) {
+      this.handleURL(nextState);
+    }
   },
 
 
@@ -63,10 +65,10 @@ let AdminController = React.createClass({
       newState.selectedItem = null;
     }
 
-    return this.state.items.search(query).then(function () {
+    return this.state.items.search(query).then(() => {
       newState.items = this.state.items;
       this.setState(newState);
-    }.bind(this));
+    });
   },
 
   handleSelectItem(item) {
@@ -75,9 +77,9 @@ let AdminController = React.createClass({
     if (this.state.items.contains(item)) {
       this.setState(newState);
     } else {
-      item.fetch().then(function () {
+      item.fetch().then(() => {
         this.handleSearch(this.state.searchQuery, newState);
-      }.bind(this));
+      });
     }
   },
 
@@ -116,8 +118,7 @@ let AdminController = React.createClass({
     if (newState.selectedItem) {
       newURL = `/${newState.selectedItem.id}/`;
     } else {
-      var params = query === '' ? {} : {q: query};
-      newURL = router.toFragment('', params);
+      newURL = query === '' ? '/' : `?q=${encodeURIComponent(query)}`;
     }
 
     router.navigate(newURL);
@@ -153,7 +154,7 @@ let AdminController = React.createClass({
 
     return (
       <div className="admin-app">
-        <this.props.adminModule.App {...props} />
+        <this.props.adminModule.Controller {...props} />
       </div>
     );
   }

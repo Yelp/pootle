@@ -31,6 +31,7 @@ from .util import UNTRANSLATED, FUZZY, TRANSLATED, OBSOLETE
 
 FORM_RE = re.compile('\r\n|\r|\n|\t|\\\\')
 
+
 def highlight_whitespace(text):
     """Make whitespace chars visible."""
 
@@ -41,12 +42,15 @@ def highlight_whitespace(text):
             '\n': '\\n\n',
             '\t': '\\t',
             '\\': '\\\\',
-            }
+        }
         return submap[match.group()]
 
     return FORM_RE.sub(replace, text)
 
+
 FORM_UNRE = re.compile('\r|\n|\t|\\\\r|\\\\n|\\\\t|\\\\\\\\')
+
+
 def unhighlight_whitespace(text):
     """Replace visible whitespace with proper whitespace."""
 
@@ -59,10 +63,11 @@ def unhighlight_whitespace(text):
             '\\n': '\n',
             '\\r': '\r',
             '\\\\': '\\',
-            }
+        }
         return submap[match.group()]
 
     return FORM_UNRE.sub(replace, text)
+
 
 class MultiStringWidget(forms.MultiWidget):
     """Custom Widget for editing multistrings, expands number of text
@@ -103,6 +108,7 @@ class MultiStringWidget(forms.MultiWidget):
         else:
             raise ValueError
 
+
 class HiddenMultiStringWidget(MultiStringWidget):
     """Uses hidden input instead of textareas."""
 
@@ -114,14 +120,13 @@ class HiddenMultiStringWidget(MultiStringWidget):
         return super(MultiStringWidget, self).format_output(rendered_widgets)
 
     def __call__(self):
-        #HACKISH: Django is inconsistent in how it handles
-        # Field.widget and Field.hidden_widget, it expects widget to
-        # be an instantiated object and hidden_widget to be a class,
-        # since we need to specify nplurals at run time we can let
-        # django instantiate hidden_widget.
+        # HACKISH: Django is inconsistent in how it handles Field.widget and
+        # Field.hidden_widget, it expects widget to be an instantiated object
+        # and hidden_widget to be a class, since we need to specify nplurals at
+        # run time we can let django instantiate hidden_widget.
         #
-        # making the object callable let's us get away with forcing an
-        # object where django expects a class
+        # making the object callable let's us get away with forcing an object
+        # where django expects a class
         return self
 
 

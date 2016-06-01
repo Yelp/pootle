@@ -6,8 +6,6 @@
  * AUTHORS file for copyright and authorship information.
  */
 
-'use strict';
-
 import cx from 'classnames';
 import React from 'react';
 import _ from 'underscore';
@@ -15,7 +13,7 @@ import _ from 'underscore';
 import ItemTable from './ItemTable';
 
 
-let Search = React.createClass({
+const Search = React.createClass({
 
   propTypes: {
     fields: React.PropTypes.array.isRequired,
@@ -69,7 +67,7 @@ let Search = React.createClass({
 
     let resultsClassNames = cx({
       'search-results': true,
-      'loading': isLoading
+      'loading': isLoading,
     });
 
     return (
@@ -101,12 +99,12 @@ let Search = React.createClass({
         </div>
       </div>
     );
-  }
+  },
 
 });
 
 
-let SearchBox = React.createClass({
+const SearchBox = React.createClass({
 
   propTypes: {
     onSearch: React.PropTypes.func.isRequired,
@@ -119,7 +117,7 @@ let SearchBox = React.createClass({
   getInitialState() {
     return {
       // XXX: review, prop should be explicitly named `initialSearchQuery`
-      searchQuery: this.props.searchQuery
+      searchQuery: this.props.searchQuery,
     };
   },
 
@@ -168,7 +166,7 @@ let SearchBox = React.createClass({
         {...this.props}
       />
     );
-  }
+  },
 
 });
 

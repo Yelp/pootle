@@ -161,7 +161,7 @@ def reports(request):
 def get_detailed_report_context(user, month):
     [start, end] = get_date_interval(month)
 
-    totals = {'translated': {}, 'reviewed': {}, 'suggested': 0, 'total': 0,
+    totals = {'translated': {}, 'reviewed': {}, 'suggested': 0,
               'paid_tasks': {},
               'all': 0}
     items = []
@@ -188,11 +188,19 @@ def get_detailed_report_context(user, month):
             wordcount = None
 
             translated, reviewed = score.get_paid_wordcounts()
+            translated_details = {}
             if translated is not None:
                 action = ReportActionTypes.TRANSLATION
                 subtotal = score.rate * translated
                 wordcount = translated
-
+                translated_details['raw_rate'] = score.rate - score.review_rate
+                translated_details['raw_translated_wordcount'] = \
+                    score.wordcount * (1 - score.get_similarity())
+                translated_details['raw_subtotal'] = \
+                    (translated_details['raw_translated_wordcount'] *
+                     translated_details['raw_rate'])
+                translated_details['review_subtotal'] = \
+                    score.wordcount * score.review_rate
                 if score.rate in totals['translated']:
                     totals['translated'][score.rate]['words'] += translated
                 else:
@@ -223,6 +231,8 @@ def get_detailed_report_context(user, month):
                     'similarity': score.get_similarity() * 100,
                     'subtotal': subtotal,
                     'wordcount': wordcount,
+                    'source_wordcount': score.wordcount,
+                    'translated_details': translated_details,
                     'creation_time': score.creation_time,
                 })
 
@@ -256,16 +266,17 @@ def get_detailed_report_context(user, month):
                 }
 
         for rate, words in totals['translated'].items():
-            totals['translated'][rate]['words'] = totals['translated'][rate]['words']
-            totals['translated'][rate]['subtotal'] = rate * totals['translated'][rate]['words']
+            totals['translated'][rate]['rounded_words'] = \
+                int(round(totals['translated'][rate]['words']))
+            totals['translated'][rate]['subtotal'] = \
+                rate * totals['translated'][rate]['rounded_words']
             totals['all'] += totals['translated'][rate]['subtotal']
 
         for rate, words in totals['reviewed'].items():
-            totals['reviewed'][rate]['words'] = totals['reviewed'][rate]['words']
             totals['reviewed'][rate]['subtotal'] = rate * totals['reviewed'][rate]['words']
             totals['all'] += totals['reviewed'][rate]['subtotal']
 
-        totals['all'] = totals['all']
+        totals['all'] = round(totals['all'], 2) + 0
 
         items = sorted(items, key=lambda x: x['creation_time'])
 
@@ -317,7 +328,7 @@ def update_user_rates(request):
             User = get_user_model()
             user = User.objects.get(username=form.cleaned_data['username'])
         except User.DoesNotExist:
-            error_text = _("User %s not found" % form.cleaned_data['username'])
+            error_text = _("User %s not found", form.cleaned_data['username'])
             return JsonResponseNotFound({'msg': error_text})
 
         user.currency = form.cleaned_data['currency']
@@ -544,14 +555,63 @@ def get_daily_activity(user, scores, start, end):
     return result
 
 
+def get_tasks(user, start, end):
+    return PaidTask.objects \
+                   .filter(user=user,
+                           datetime__gte=start,
+                           datetime__lte=end) \
+                   .order_by('pk')
+
+
+def get_rates(user, start, end):
+    """Get user rates that were set for the user during a period
+    from start to end. Raise an exception if the user has multiple rates
+    during the period.
+
+    :param user: get rates for this User object.
+    :param start: datetime
+    :param end: datetime
+    :return: a tuple ``(rate, review_rate, hourly_rate)`` where ``rate`` is the
+        translation rate, and ``review_rate`` is the review rate, and ``hourly_rate``
+        is the rate for hourly work that can be added as PaidTask.
+    """
+
+    scores = get_scores(user, start, end)
+    rate, review_rate, hourly_rate = 0, 0, 0
+    rates = scores.values('rate', 'review_rate').distinct()
+    if len(rates) > 1:
+        raise Exception("Multiple user [%s] rate values." % user.username)
+    elif len(rates) == 1:
+        rate = rates[0]['rate']
+        review_rate = rates[0]['review_rate']
+
+    tasks = get_tasks(user, start, end)
+    task_rates = tasks.values('task_type', 'rate').distinct()
+    for task_rate in task_rates:
+        if (task_rate['task_type'] == PaidTaskTypes.TRANSLATION and
+            rate > 0 and
+            task_rate['rate'] != rate):
+            raise Exception("Multiple user [%s] rate values." % user.username)
+        if (task_rate['task_type'] == PaidTaskTypes.REVIEW and
+            review_rate > 0 and
+            task_rate['rate'] != review_rate):
+            raise Exception("Multiple user [%s] rate values." % user.username)
+        if task_rate['task_type'] == PaidTaskTypes.HOURLY_WORK:
+            if hourly_rate > 0 and task_rate['rate'] != hourly_rate:
+                raise Exception("Multiple user [%s] rate values." % user.username)
+            hourly_rate = task_rate['rate']
+
+    rate = rate if rate > 0 else user.rate
+    review_rate = review_rate if review_rate > 0 else user.review_rate
+    hourly_rate = hourly_rate if hourly_rate > 0 else user.hourly_rate
+
+    return rate, review_rate, hourly_rate
+
+
 def get_paid_tasks(user, start, end):
     result = []
 
-    tasks = PaidTask.objects \
-        .filter(user=user,
-                datetime__gte=start,
-                datetime__lte=end) \
-        .order_by('pk')
+    tasks = get_tasks(user, start, end)
 
     for task in tasks:
         result.append({
@@ -693,6 +753,8 @@ def get_summary(scores, start, end):
     return result
 
 
+@ajax_required
+@admin_required
 def users(request):
     User = get_user_model()
     data = list(

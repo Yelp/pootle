@@ -31,14 +31,16 @@ collections.UnitSet = Backbone.Collection.extend({
     return this.uIds.indexOf(unit.id);
   },
 
+  getByUnitId: function (uId) {
+    return uId > 0 ? this.get(uId) : this.at(0);
+  },
+
   getCurrent: function () {
     return this.activeUnit;
   },
   setCurrent: function (unit) {
-    this.activeUnit = unit instanceof this.model ? unit : this.get(unit);
-  },
-  setFirstAsCurrent: function () {
-    this.setCurrent(this.at(0));
+    this.activeUnit = unit instanceof this.model ? unit : this.getByUnitId(unit);
+    return this.activeUnit;
   },
 
   fetchedIds: function () {
@@ -63,7 +65,7 @@ collections.UnitSet = Backbone.Collection.extend({
 
   hasPrev: function () {
     return this.prev() !== null;
-  }
+  },
 
 });
 

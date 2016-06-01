@@ -16,7 +16,6 @@ from translate.storage.base import ParseError
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models, IntegrityError
-from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
@@ -28,9 +27,9 @@ from pootle_app.models.directory import Directory
 from pootle_language.models import Language
 from pootle_misc.checks import excluded_filters
 from pootle_project.models import Project
-from pootle_store.models import (Store, Unit, PARSED)
-from pootle_store.util import (absolute_real_path, relative_real_path,
-                               OBSOLETE)
+from pootle_store.models import Store, Unit, PARSED
+from pootle_store.util import absolute_real_path, relative_real_path, OBSOLETE
+from staticpages.models import StaticPage
 
 
 class TranslationProjectNonDBState(object):
@@ -56,7 +55,7 @@ def create_or_resurrect_translation_project(language, project):
 
 def create_translation_project(language, project):
     from pootle_app import project_tree
-    if project_tree.translation_project_should_exist(language, project):
+    if project_tree.translation_project_dir_exists(language, project):
         try:
             translation_project, created = TranslationProject.objects.all() \
                     .get_or_create(language=language, project=project)
@@ -104,7 +103,7 @@ class TranslationProjectManager(models.Manager):
         )
 
     def get_terminology_project(self, language_id):
-        #FIXME: the code below currently uses the same approach to determine
+        # FIXME: the code below currently uses the same approach to determine
         # the 'terminology' kind of a project as 'Project.is_terminology()',
         # which means it checks the value of 'checkstyle' field
         # (see pootle_project/models.py:240).
@@ -237,7 +236,6 @@ class TranslationProject(models.Model, CachedTreeItem):
 
     @property
     def units(self):
-        self.require_units()
         # FIXME: we rely on implicit ordering defined in the model. We might
         # want to consider pootle_path as well
         return Unit.objects.filter(store__translation_project=self,
@@ -267,17 +265,14 @@ class TranslationProject(models.Model, CachedTreeItem):
         created = self.id is None
 
         if created:
-            from pootle_app.project_tree import translation_project_should_exist
+            from pootle_app.project_tree import translation_project_dir_exists
 
             template_tp = self.project.get_template_translationproject()
-            initialize_from_templates = False
-
-            if (not self.is_template_project and
-                template_tp is not None and
-                not translation_project_should_exist(self.language,
-                                                     self.project)):
-
-                initialize_from_templates = True
+            initialize_from_templates = (
+                not self.is_template_project
+                and template_tp is not None
+                and not translation_project_dir_exists(self.language,
+                                                       self.project))
 
         self.directory = self.language.directory \
                                       .get_or_make_subdir(self.project.code)
@@ -297,16 +292,20 @@ class TranslationProject(models.Model, CachedTreeItem):
                 # disk, so initialize the TP files using the templates TP ones.
                 from pootle_app.project_tree import init_store_from_template
 
-                for template_store in template_tp.stores.iterator():
+                for template_store in template_tp.stores.live().iterator():
                     init_store_from_template(self, template_store)
 
             self.scan_files()
 
-            if initialize_from_templates:
+            # Create units from disk store
+            for store in self.stores.live().iterator():
+                changed = store.update_from_disk()
+
+                # If there were changes stats will be refreshed anyway - otherwise...
                 # Trigger stats refresh for TP added from UI.
                 # FIXME: This won't be necessary once #3547 is fixed.
-                for store in self.stores.live().iterator():
-                    store.update()
+                if not changed:
+                    store.save(update_cache=True)
 
     def delete(self, *args, **kwargs):
         directory = self.directory
@@ -325,6 +324,10 @@ class TranslationProject(models.Model, CachedTreeItem):
             get_editor_filter(**kwargs),
         ])
 
+    def get_announcement(self, user=None):
+        """Return the related announcement, if any."""
+        return StaticPage.get_announcement_for(self.pootle_path, user)
+
     def filtererrorhandler(self, functionname, str1, str2, e):
         logging.error(u"Error in filter %s: %r, %r, %s", functionname, str1,
                       str2, e)
@@ -339,11 +342,11 @@ class TranslationProject(models.Model, CachedTreeItem):
 
         return self.project.code in Project.accessible_by_user(user)
 
-    def update(self, overwrite=True):
+    def update(self):
         """Update all stores to reflect state on disk"""
         stores = self.stores.live().exclude(file='').filter(state__gte=PARSED)
         for store in stores.iterator():
-            store.update(overwrite=overwrite)
+            store.update_from_disk()
 
     def sync(self, conservative=True, skip_missing=False, only_newer=True):
         """Sync unsaved work on all stores to disk"""
@@ -352,18 +355,6 @@ class TranslationProject(models.Model, CachedTreeItem):
             store.sync(update_structure=not conservative,
                        conservative=conservative,
                        skip_missing=skip_missing, only_newer=only_newer)
-
-    def require_units(self):
-        """Makes sure all stores are parsed"""
-        for store in self.stores.live().filter(state__lt=PARSED).iterator():
-            try:
-                store.require_units()
-            except IntegrityError:
-                logging.info(u"Duplicate IDs in %s", store.abs_real_path)
-            except ParseError as e:
-                logging.info(u"Failed to parse %s\n%s", store.abs_real_path, e)
-            except (IOError, OSError) as e:
-                logging.info(u"Can't access %s\n%s", store.abs_real_path, e)
 
     ### TreeItem
     def get_children(self):
@@ -478,7 +469,9 @@ class TranslationProject(models.Model, CachedTreeItem):
 
         return self.non_db_state.termmatcher
 
+
     ###########################################################################
+
 
 @receiver(post_save, sender=Project)
 def scan_languages(sender, instance, created=False, raw=False, **kwargs):

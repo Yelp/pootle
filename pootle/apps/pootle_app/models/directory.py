@@ -17,6 +17,7 @@ from pootle.core.url_helpers import (get_editor_filter, split_pootle_path,
                                      to_tp_relative_path)
 from pootle_misc.baseurl import l
 
+
 class DirectoryManager(models.Manager):
     use_for_related_fields = True
 
@@ -159,7 +160,7 @@ class Directory(models.Model, CachedTreeItem):
     def get_children(self):
         result = []
         if not self.is_projects_root():
-            #FIXME: can we replace this with a quicker path query?
+            # FIXME: can we replace this with a quicker path query?
             result.extend([item for item in self.child_stores.live().iterator()])
             result.extend([item for item in self.child_dirs.live().iterator()])
         else:

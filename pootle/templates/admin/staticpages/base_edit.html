@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% load assets %}
+
+{% block section_body %}
+<div class="staticpages settings-container centered">
+  <div class="staticpages-edit">
+    {% include 'admin/staticpages/_form.html' %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+{% assets 'js_admin_general_app' %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+<script type="text/javascript">
+  $(function () {
+    PTL.commonAdmin.init({
+      page: 'staticpages',
+      opts: {
+        htmlName: '{{ form.body.html_name }}',
+        initialValue: '{{ form.initial.body.raw|escapejs }}',
+        markup: PTL.settings.MARKUP_FILTER,
+      }
+    });
+  });
+</script>
+{% endblock %}
