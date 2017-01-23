@@ -3,7 +3,7 @@
 
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
-
+export DH_VIRTUALENV_INSTALL_ROOT=/opt/venvs
 
 %:
 		dh $@ --with python-virtualenv
