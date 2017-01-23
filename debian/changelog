@@ -1,3 +1,9 @@
+python-pootle (2.7.5-yelp2) lucid; urgency=low
+
+  * dh-virtualenv 1.x compatible
+
+ -- asottile <asottile@asottile-MacBookPro>  Mon, 23 Jan 2017 13:57:19 -0800
+
 python-pootle (2.7.5-yelp1) lucid; urgency=low
 
   * Pulled stable/2.7.5 
